@@ -338,5 +338,18 @@ class SecurityProfile2
         return $counter;
     }
 
+    public function isTmpSecProf()
+    {
+        if( $this->type === self::$SecurityProfileTypes[self::TypeTmp] )
+            return TRUE;
+
+        return FALSE;
+    }
+
+    public function isTmp()
+    {
+        return self::isTmpSecProf();
+    }
+
 }
 

@@ -238,7 +238,23 @@ class SecurityProfileGroup
                         else
                         {
                             //Todo: not a profile - default profile
+                            if( $tmp_store_name == 'AntiVirusProfileStore')
+                                $profile = $sub->AntiVirusPredefinedStore->createSPTmp( $tmp_type->nodeValue, $this );
+                            elseif( $tmp_store_name == 'AntiSpywareProfileStore')
+                                $profile = $sub->AntiSpywarePredefinedStore->createSPTmp( $tmp_type->nodeValue, $this );
+                            elseif( $tmp_store_name == 'VulnerabilityProfileStore')
+                                $profile = $sub->VulnerabilityPredefinedStore->createSPTmp( $tmp_type->nodeValue, $this );
+                            elseif( $tmp_store_name == 'FileBlockingProfileStore' )
+                                $profile = $sub->FileBlockingPredefinedStore->createSPTmp( $tmp_type->nodeValue, $this );
+                            elseif( $tmp_store_name == 'WildfireProfileStore' )
+                                $profile = $sub->WildfirePredefinedStore->createSPTmp( $tmp_type->nodeValue, $this );
+                            elseif( $tmp_store_name == 'URLProfileStore' )
+                                $profile = $sub->UrlFilteringPredefinedStore->createSPTmp( $tmp_type->nodeValue, $this );
+                            elseif( $tmp_store_name == 'VirusAndWildfireProfileStore' )
+                                $profile = $sub->VirusAndWildfireProfileStore->createSPTmp( $tmp_type->nodeValue, $this );
+
                             #PH::print_stdout( "SecurityProfileGroup: ".$this->name()." - proftype: ".$secprof_type." - PROFILE: ".$tmp_type->nodeValue." not found");
+
                             $this->secprofiles[$secprof_type] = $tmp_type->nodeValue;
                         }
                     }

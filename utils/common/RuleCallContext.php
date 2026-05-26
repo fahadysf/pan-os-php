@@ -1535,7 +1535,10 @@ class RuleCallContext extends CallContext
                                 $bp_check .= $adoption_NOT_sign;
                         }
                     }
-                    $profiles[] = $profType . ':' . $profile->name().$bp_check;
+                    if( str_contains( $profile->owner->name(), "predefined" ) )
+                        $profiles[] = $profType . ':' . $profile->name()."[predefined]".$bp_check;
+                    else
+                        $profiles[] = $profType . ':' . $profile->name().$bp_check;
                 }
             }
             else
@@ -1679,7 +1682,13 @@ class RuleCallContext extends CallContext
             if( !is_object($profileName) )
                 return self::enclose( $profileName, $wrap );
             else
-                return self::enclose( $profileName->name(), $wrap );
+            {
+                if( str_contains( $profileName->owner->name(), "predefined" ) )
+                    return self::enclose( $profileName->name()."[predefined]", $wrap );
+                else
+                    return self::enclose( $profileName->name(), $wrap );
+            }
+
         }
 
         return self::enclose( '' );

@@ -536,6 +536,21 @@ class SecurityRule extends RuleWithUserID
                             //todo: not an object - default object not yet created
                             mwarning( "SecRule: '".$this->name()."' SecurityProfile: '".$firstE->textContent."' of Type: '".$prof->nodeName."' StoreName: '".$tmp_store_name."' not found.", null, false );
                             #$this->secprofProfiles_obj[$prof->nodeName] = $firstE->textContent;
+
+                            if( $tmp_store_name == 'AntiVirusProfileStore')
+                                $profile = $sub->AntiVirusPredefinedStore->createSPTmp( $firstE->textContent, $this );
+                            elseif( $tmp_store_name == 'AntiSpywareProfileStore')
+                                $profile = $sub->AntiSpywarePredefinedStore->createSPTmp( $firstE->textContent, $this );
+                            elseif( $tmp_store_name == 'VulnerabilityProfileStore')
+                                $profile = $sub->VulnerabilityPredefinedStore->createSPTmp( $firstE->textContent, $this );
+                            elseif( $tmp_store_name == 'FileBlockingProfileStore' )
+                                $profile = $sub->FileBlockingPredefinedStore->createSPTmp( $firstE->textContent, $this );
+                            elseif( $tmp_store_name == 'WildfireProfileStore' )
+                                $profile = $sub->WildfirePredefinedStore->createSPTmp( $firstE->textContent, $this );
+                            elseif( $tmp_store_name == 'URLProfileStore' )
+                                $profile = $sub->UrlFilteringPredefinedStore->createSPTmp( $firstE->textContent, $this );
+                            elseif( $tmp_store_name == 'VirusAndWildfireProfileStore' )
+                                $profile = $sub->VirusAndWildfireProfileStore->createSPTmp( $firstE->textContent, $this );
                         }
                     }
                 }
@@ -1247,8 +1262,16 @@ class SecurityRule extends RuleWithUserID
                 {
                     if( is_object( $profile ) )
                     {
-                        $text .= "[" . $id . "] => '" . $profile->name() . "'  ";
-                        PH::$JSON_TMP['sub']['object'][$this->name()]['securityprofile'][$id] = $profile->name();
+                        if( str_contains($profile->owner->name(), "predefined") )
+                        {
+                            $text .= "[" . $id . "] => '" . $profile->name() . "'[predefined]  ";
+                            PH::$JSON_TMP['sub']['object'][$this->name()]['securityprofile'][$id] = $profile->name();
+                        }
+                        else
+                        {
+                            $text .= "[" . $id . "] => '" . $profile->name() . "'  ";
+                            PH::$JSON_TMP['sub']['object'][$this->name()]['securityprofile'][$id] = $profile->name();
+                        }
                     }
                     else
                     {

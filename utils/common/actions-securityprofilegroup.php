@@ -603,32 +603,6 @@ SecurityProfileGroupCallContext::$supportedActions[] = array(
                     $f = SecurityProfileGroupCallContext::$commonActionFunctions['html-add-name']['function'];
                     $f($context, $object, $secProfType, $secProfStore, $bestPractice, $visibility, $adoption, $bp_text_yes, $bp_text_no, $lines);
 
-                    /*
-                    if (isset($object->secprofProfiles_obj['virus-and-wildfire-analysis']))
-                    {
-                        $secProfObj = $object->secprofProfiles_obj['virus-and-wildfire-analysis'];
-                        $secProfStore = "VirusAndWildfireProfileStore";
-
-                        $lines .= $context->encloseFunction($object->secprofProfiles_obj['virus-and-wildfire-analysis']);
-
-                        if ($bestPractice)
-                            $lines .= $context->encloseFunction("validation needed");
-                        if ($visibility)
-                            $lines .= $context->encloseFunction("validation needed");
-                        if ($adoption)
-                            $lines .= $context->encloseFunction("validation needed");
-                    } else {
-                        $lines .= $context->encloseFunction("---");
-
-                        if ($bestPractice)
-                            $lines .= $context->encloseFunction("---");
-                        if ($visibility)
-                            $lines .= $context->encloseFunction("---");
-                        if ($adoption)
-                            $lines .= $context->encloseFunction("---");
-                    }
-                    */
-
                     ////////////////////
 
                     $secProfStore = "DNSSecurityProfileStore";
@@ -636,32 +610,6 @@ SecurityProfileGroupCallContext::$supportedActions[] = array(
 
                     $f = SecurityProfileGroupCallContext::$commonActionFunctions['html-add-name']['function'];
                     $f($context, $object, $secProfType, $secProfStore, $bestPractice, $visibility, $adoption, $bp_text_yes, $bp_text_no, $lines);
-
-                    /*
-                    if (isset($object->secprofProfiles_obj['dns-security']))
-                    {
-                        $secProfObj = $object->secprofProfiles_obj['dns-security'];
-                        $secProfStore = "DNSSecurityProfileStore";
-
-                        $lines .= $context->encloseFunction($secProfObj);
-
-                        if ($bestPractice)
-                            $lines .= $context->encloseFunction("validation needed");
-                        if ($visibility)
-                            $lines .= $context->encloseFunction("validation needed");
-                        if ($adoption)
-                            $lines .= $context->encloseFunction("validation needed");
-                    } else {
-                        $lines .= $context->encloseFunction("---");
-
-                        if ($bestPractice)
-                            $lines .= $context->encloseFunction("---");
-                        if ($visibility)
-                            $lines .= $context->encloseFunction("---");
-                        if ($adoption)
-                            $lines .= $context->encloseFunction("---");
-                    }
-                    */
                 }
 
 
