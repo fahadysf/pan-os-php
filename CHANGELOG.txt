@@ -5,6 +5,7 @@ UTIL:
 * type=rule | extend secprof information with [predefined] - new 'filter=(secprof has.predefined)'
 
 BUGFIX:
+* ironskillet - improvement for PAN-OS 10.2 URL
 
 GENERAL:
 
