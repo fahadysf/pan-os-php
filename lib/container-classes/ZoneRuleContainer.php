@@ -241,7 +241,8 @@ class ZoneRuleContainer extends ObjRuleContainer
                                 if( $tmp_zone !== null )
                                 {
                                     $zone_added = true;
-                                    $this->o[] = $tmp_zone;
+                                    if( !$this->has($tmp_zone) )
+                                        $this->o[] = $tmp_zone;
                                     $tmp_zone->addReference($this);
                                 }
                             }
@@ -275,7 +276,8 @@ class ZoneRuleContainer extends ObjRuleContainer
             {
                 //old Code before 2.1.37
                 $f = $this->parentCentralStore->findOrCreate($node->textContent, $this);
-                $this->o[] = $f;
+                if( !$this->has($f) )
+                    $this->o[] = $f;
             }
 
             $i++;

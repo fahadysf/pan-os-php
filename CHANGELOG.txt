@@ -6,6 +6,7 @@ UTIL:
 
 BUGFIX:
 * ironskillet - improvement for PAN-OS 10.2 URL
+* class ZoneRuleContainer | bugfix to NOT add zone twice
 
 GENERAL:
 
