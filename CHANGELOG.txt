@@ -9,6 +9,7 @@ BUGFIX:
 * class ZoneRuleContainer | bugfix to NOT add zone twice
 
 GENERAL:
+* update Device App-ID to version: 9106-10070
 
 
 2.1.54 (20260517)
