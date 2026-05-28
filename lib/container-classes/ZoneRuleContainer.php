@@ -198,10 +198,13 @@ class ZoneRuleContainer extends ObjRuleContainer
                 derr('this container has members with empty name!', $node);
             }
 
-
+            //disabled as 20260528 - as it was always set to run the bugfix code
+            /*
             $bugfix = true;
             if( $bugfix )
             {
+            */
+
                 if (isset($this->owner->owner->owner) && get_class($this->owner->owner->owner) == 'DeviceGroup')
                 {
                     $actualDG = $this->owner->owner->owner;
@@ -242,7 +245,7 @@ class ZoneRuleContainer extends ObjRuleContainer
                                     $tmp_zone = $vsys->zoneStore->find($node->textContent, $this);
                                     if ($tmp_zone !== null)
                                     {
-                                        $zone_added = true;
+                                        #$zone_added = true;
                                         if (!$this->has($tmp_zone))
                                         {
                                             $this->o[] = $tmp_zone;
@@ -252,11 +255,8 @@ class ZoneRuleContainer extends ObjRuleContainer
                                 }
                             }
 
-                            if( !$zone_added )
-                            {
+                            #if( !$zone_added )
                                 #print "Zone: ".$node->textContent." NOT found \n";
-                            }
-
 
                             //this is needed to get type=rule 'filter=(from has XZY) - back into working mode
                             $f = $this->parentCentralStore->findOrCreate($node->textContent, $this);
@@ -266,6 +266,7 @@ class ZoneRuleContainer extends ObjRuleContainer
                                 $f->addReference($this);
                             }
 
+                            //only check the first template-stack - more to check???
                             break;
                         }
                     }
@@ -290,6 +291,7 @@ class ZoneRuleContainer extends ObjRuleContainer
                         $f->addReference($this);
                     }
                 }
+            /*
             }
             else
             {
@@ -301,6 +303,7 @@ class ZoneRuleContainer extends ObjRuleContainer
                     $f->addReference($this);
                 }
             }
+            */
 
             $i++;
         }
