@@ -42,7 +42,7 @@ def main():
     with open(json_config_path, 'r') as f:
         data = json.load(f)
 
-    # UPDATED TEMPLATE: Set font-size to 8pt for the checkbox container and the checkbox input element itself
+    # UPDATED TEMPLATE: Added onload trigger to <body> and 'checked' attribute to <input>
     html_template = """
     <!DOCTYPE html>
     <html>
@@ -107,10 +107,10 @@ def main():
             }}
         </script>
     </head>
-    <body>
+    <body onload="toggleZeroRows()">
         <div class="filter-container">
             <label style="display: flex; align-items: center;">
-                <input type="checkbox" id="hideZeroCheckbox" onchange="toggleZeroRows()"> Hide rows with 0 instances
+                <input type="checkbox" id="hideZeroCheckbox" onchange="toggleZeroRows()" checked> Hide rows with 0 instances
             </label>
         </div>
 
