@@ -1246,7 +1246,7 @@ trait StatCollectorTrait
         $workingArray[] = array( 'wf best-practice mica-engine', $ruleForCalculation);
         $workingArray[] = array( 'wf adoption', $ruleForCalculation);
 
-        $workingArray[] = array( 'zone protection', 'security rules enabled');
+        $workingArray[] = array( 'zone protection', $ruleForCalculation);
         $workingArray[] = array( 'app id', $ruleForCalculation);
         $workingArray[] = array( 'user id', 'security rules enabled');
         $workingArray[] = array( 'service port', $ruleForCalculation);
