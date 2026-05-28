@@ -8114,6 +8114,14 @@ var subjectObject =
                         "Function": {},
                         "arg": true,
                         "help": "example: 'filter=(secprof has.from.query subquery1)' 'subquery1=(av is.best-practice)'"
+                    },
+                    "has.predefined": {
+                        "Function": {},
+                        "arg": false,
+                        "ci": {
+                            "fString": "(%PROP% av-production)",
+                            "input": "input\/panorama-8.0.xml"
+                        }
                     }
                 }
             },
@@ -9956,6 +9964,10 @@ var subjectObject =
                             "fString": "(%PROP%)",
                             "input": "input\/panorama-8.0.xml"
                         }
+                    },
+                    "is.predefined": {
+                        "Function": {},
+                        "arg": false
                     }
                 }
             },

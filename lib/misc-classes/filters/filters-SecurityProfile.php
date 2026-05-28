@@ -1814,4 +1814,16 @@ RQuery::$defaultFilters['securityprofile']['url.site-access']['operators']['allo
     'arg' => false,
     'help' => "'securityprofiletype=url-filtering' e.g. 'filter=(url.site-access allow.is.set)'"
 );
+
+RQuery::$defaultFilters['securityprofile']['object']['operators']['is.predefined'] = array(
+    'Function' => function (SecurityProfileRQueryContext $context) {
+        $object = $context->object;
+
+        if( str_contains($object->owner->name(), "predefined"))
+            return TRUE;
+
+        return FALSE;
+    },
+    'arg' => FALSE
+);
 // </editor-fold>
