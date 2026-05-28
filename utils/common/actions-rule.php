@@ -5090,6 +5090,7 @@ RuleCallContext::$supportedActions[] = array(
             'tag' => 'tags',
             'grouptag' => 'grouptags',
             'from' => 'from',
+            'from-visible' => 'from-visible',
             'to' => 'to',
             'src_negated' => 'source_negated',
             'src' => 'source',
@@ -5325,7 +5326,7 @@ RuleCallContext::$supportedActions[] = array(
                         $continue = true;
                     }
                     elseif(
-                        ($fieldName == 'sp_av_visible' || $fieldName == 'sp_as_visible' || $fieldName == 'sp_vp_visible'
+                        ($fieldName == 'from-visible' || $fieldName == 'sp_av_visible' || $fieldName == 'sp_as_visible' || $fieldName == 'sp_vp_visible'
                             || $fieldName == 'sp_url_visible' || $fieldName == 'sp_file_visible' || $fieldName == 'sp_data_visible'
                             || $fieldName == 'sp_wf_visible'
                             || $fieldName == 'sp_dns_sec_visible' || $fieldName == 'sp_av_and_wf_visible'
@@ -5569,7 +5570,7 @@ RuleCallContext::$supportedActions[] = array(
                 $continue = true;
             }
             elseif(
-                ($fieldName == 'sp_av_visible' || $fieldName == 'sp_as_visible' || $fieldName == 'sp_vp_visible'
+                ($fieldName == 'from-visible' || $fieldName == 'sp_av_visible' || $fieldName == 'sp_as_visible' || $fieldName == 'sp_vp_visible'
                         || $fieldName == 'sp_url_visible' || $fieldName == 'sp_file_visible' || $fieldName == 'sp_data_visible'
                         || $fieldName == 'sp_wf_visible'
                         || $fieldName == 'sp_av_and_wf_visible' || $fieldName == 'sp_dns_sec_visible'

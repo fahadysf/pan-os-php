@@ -397,6 +397,26 @@ class RuleCallContext extends CallContext
                 return self::enclose("", $wrap);
         }
 
+        if( $fieldName == 'from-visible' )
+        {
+            if( method_exists($rule->from, 'isAny'))
+            {
+                if( $rule->from->isAny() )
+                    return self::enclose('**NOT visible**');
+                $zpp_array = array();
+                foreach($rule->from->getAll() as $zones_to_check)
+                {
+                    if( $zones_to_check->isVisible() )
+                        $zpp_array[] = "**visible**";
+                    else
+                        $zpp_array[] = "**NOT visible**";
+                }
+                return self::enclose($zpp_array, $wrap);
+            }
+            else
+                return self::enclose("", $wrap);
+        }
+
         if( $fieldName == 'to' )
         {
             if( $rule->isPbfRule() && $rule->isInterfaceBased() && $rule->to != null)

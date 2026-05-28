@@ -5,6 +5,7 @@ UTIL:
 * type=rule | extend secprof information with [predefined] - new 'filter=(secprof has.predefined)'
 * type=securityprofile | display all predefined profiles
 * type=securityprofile | introduce 'filter=(object is.predefined)'
+* type=zone | introduce 'filter=(object is.visible)' | also to use in type=rule actions=exporttoexcel:rule.html,visibility
 
 BUGFIX:
 * ironskillet - improvement for PAN-OS 10.2 URL
