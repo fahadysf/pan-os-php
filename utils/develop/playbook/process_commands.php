@@ -1,71 +1,69 @@
 <?php
 
 // --- Configuration ---
-// Read input file name from command line arguments ($argv[1])
-global $argv; // Ensure $argv is available, though it often is globally.
+global $argv;
 
-if (!isset($argv[1])) {
-    // If the argument is missing, display an error and exit.
-    die("Error: Please provide the input filename as a command-line argument.\nUsage: php process_commands.php <input_filename>\n");
+$inputFile = null;
+$outputFile = 'output.json'; // Default value
+
+// 1. Parse arguments in the format key=value (e.g., in=input.txt out=output.json)
+foreach ($argv as $arg) {
+    if (strpos($arg, '=') !== false) {
+        list($key, $value) = explode('=', $arg, 2);
+        if ($key === 'in') {
+            $inputFile = $value;
+        } elseif ($key === 'out') {
+            $outputFile = $value;
+        }
+    }
 }
 
-$inputFile = $argv[1];
-$outputFile = 'output.json';
+// 2. Validation
+if (!$inputFile) {
+    die("Error: Please provide an input filename.\nUsage: php process_commands2.php in=input.txt [out=output.json]\n");
+}
 
-$commands = [];
-
-// Check if the input file exists
 if (!file_exists($inputFile)) {
     die("Error: Input file '{$inputFile}' not found.\n");
 }
 
-// Read the input file into an array of lines, skipping empty lines
-$inputLines = file($inputFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+$commands = [];
 
+// --- Processing Logic ---
+
+$inputLines = file($inputFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 echo "Processing " . count($inputLines) . " commands from '{$inputFile}'...\n";
 
 foreach ($inputLines as $lineNumber => $line) {
     $currentLine = $lineNumber + 1;
-
-    // 1. Normalize and clean the line: remove leading/trailing whitespace.
     $line = trim($line);
 
-    // 2. Skip lines that don't start with the expected command prefix
     if (!preg_match('/^pan-os-php\s+/', $line)) {
-        echo "Warning: Skipping line {$currentLine} (does not start with 'pan-os-php').\n";
-        continue;
+        continue; // Skipping non-matching lines silently or add echo if preferred
     }
 
-    // 3. Remove the command name "pan-os-php" and any subsequent whitespace
     $commandArgsString = trim(preg_replace('/^pan-os-php\s+/', '', $line));
+    $regex = '/(\w+)=([^\s\']+)|\'(\w+)=([^\']+)\'/i';
 
-    // 4. Use a robust regular expression to parse key=value arguments.
-    // The pattern captures key=value pairs, handling both unquoted values and
-    // values enclosed in single quotes ('...'), which is necessary for the XPaths.
-    // Match 1: key (e.g., type, in, fromXpath)
-    // Match 2: The full value string (either quoted or unquoted)
-    // Match 3: The unquoted content (if single quotes were used)
-    $regex = '/(\w+)=((?:[^\s\']+)|(?:\'([^\']+)\'))/i';
-
-    // PREG_SET_ORDER ensures matches are ordered as [full_match, key, value_full, value_quoted_content]
     if (preg_match_all($regex, $commandArgsString, $matches, PREG_SET_ORDER) === 0) {
-        echo "Warning: Could not parse arguments on line {$currentLine}.\n";
         continue;
     }
 
     $commandObject = [];
     foreach ($matches as $match) {
-        $key = $match[1];
-        // Determine the actual value: use the quoted content if available, otherwise the full value
-        $value = !empty($match[3]) ? $match[3] : $match[2];
+        if (!empty($match[1])) {
+            $key = $match[1];
+            $value = $match[2];
+        } elseif (!empty($match[3])) {
+            $key = $match[3];
+            $value = $match[4];
+        } else {
+            continue;
+        }
 
-        // Based on the user's desired output format:
         if ($key === 'type') {
-            // 'type' is stored only as the value (e.g., "upload")
             $commandObject[$key] = $value;
         } else {
-            // 'in', 'out', 'fromXpath', 'toXpath' are stored as "key": "key=value"
-            // This is an unusual format but adheres to the request.
             $commandObject[$key] = $key . '=' . $value;
         }
     }
@@ -75,22 +73,14 @@ foreach ($inputLines as $lineNumber => $line) {
     }
 }
 
-// Structure the final JSON output
-$finalJsonStructure = [
-    'command' => $commands
-];
+// --- Final Output ---
 
-// Encode the structure into a JSON string
-// JSON_PRETTY_PRINT for readable output
-// JSON_UNESCAPED_SLASHES to keep XPaths clean (e.g., avoid escaping of '/')
+$finalJsonStructure = ['command' => $commands];
 $jsonOutput = json_encode($finalJsonStructure, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-// Write the JSON string to the output file
 if (file_put_contents($outputFile, $jsonOutput) !== false) {
     echo "Success: Output written to '{$outputFile}'.\n";
     echo "Total commands processed: " . count($commands) . "\n";
 } else {
     die("Error: Could not write to output file '{$outputFile}'.\n");
 }
-
-?>
