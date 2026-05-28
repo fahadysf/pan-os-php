@@ -406,10 +406,19 @@ class RuleCallContext extends CallContext
                 $zpp_array = array();
                 foreach($rule->from->getAll() as $zones_to_check)
                 {
+                    /* @var Zone $zones_to_check */
                     if( $zones_to_check->isVisible() )
+                    {
                         $zpp_array[] = "**visible**";
+                    }
                     else
-                        $zpp_array[] = "**NOT visible**";
+                    {
+                        if( $zones_to_check->type() == "tmp" )
+                            $zpp_array[] = "**TMP zone - NOT visible**";
+                        else
+                            $zpp_array[] = "**NOT visible**";
+                    }
+
                 }
                 return self::enclose($zpp_array, $wrap);
             }
@@ -430,7 +439,13 @@ class RuleCallContext extends CallContext
                     if( $zones_to_check->zoneProtectionProfile != null )
                         $zpp_array[] = "**ZPP set**";
                     else
-                        $zpp_array[] = "**NO ZPP**";
+                    {
+                        if( $zones_to_check->type() == "tmp" )
+                            $zpp_array[] = "**TMP zone - NO ZPP**";
+                        else
+                            $zpp_array[] = "**NO ZPP**";
+                    }
+
                 }
                 return self::enclose($zpp_array, $wrap);
             }
@@ -451,7 +466,14 @@ class RuleCallContext extends CallContext
                     if( $zones_to_check->logsetting != null )
                         $zpp_array[] = "**zone LFP set**";
                     else
-                        $zpp_array[] = "**NO zone LFP**";
+                    {
+                        if( $zones_to_check->type() == "tmp" )
+                            $zpp_array[] = "**TMP zone - NO zone LFP**";
+                        else
+
+                            $zpp_array[] = "**NO zone LFP**";
+                    }
+
                 }
                 return self::enclose($zpp_array, $wrap);
             }
