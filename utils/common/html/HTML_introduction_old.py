@@ -42,7 +42,7 @@ def main():
     with open(json_config_path, 'r') as f:
         data = json.load(f)
 
-    # UPDATED TEMPLATE: Added Checkbox, added .data-row class, and added Toggle JavaScript function
+    # UPDATED TEMPLATE: Added Legend Rows and expanded CSS
     html_template = """
     <!DOCTYPE html>
     <html>
@@ -69,39 +69,9 @@ def main():
             .high {{ background-color: #ff6d01; }}
             .medium {{ background-color: #fcab70; }}
             .low {{ background-color: #ffff00; }}
-
-            /* Checkbox container style */
-            .filter-container {{ margin-bottom: 15px; font-size: 10pt; font-weight: bold; }}
         </style>
-        <script>
-            function toggleZeroRows() {{
-                var checkbox = document.getElementById("hideZeroCheckbox");
-                var rows = document.querySelectorAll(".data-row");
-
-                rows.forEach(function(row) {{
-                    // Find the text content inside the second cell (index 1) which is "Number of Instances"
-                    var countCell = row.getElementsByClassName("instance-count")[0];
-                    if (countCell) {{
-                        var count = parseInt(countCell.textContent.trim(), 10);
-                        if (count === 0) {{
-                            if (checkbox.checked) {{
-                                row.style.display = "none";
-                            }} else {{
-                                row.style.display = "";
-                            }}
-                        }}
-                    }}
-                }});
-            }}
-        </script>
     </head>
     <body>
-        <div class="filter-container">
-            <label>
-                <input type="checkbox" id="hideZeroCheckbox" onchange="toggleZeroRows()"> Hide rows with 0 instances
-            </label>
-        </div>
-
         <table class="waffle" cellspacing="0" cellpadding="0">
             <tbody>
                 <tr style="height: 16px">
@@ -152,11 +122,10 @@ def main():
             else:
                 sev_style = 'class="s11"'
 
-            # UPDATED: Added 'class="data-row"' to <tr> and 'class="s11 instance-count"' to the instance count cell
             rows_content += f"""
-            <tr class="data-row">
+            <tr>
                 <td class="s9">{sheet_name}</td>
-                <td class="s11 instance-count">{instances}</td>
+                <td class="s11">{instances}</td>
                 <td class="s11">{explanation}</td>
                 <td class="s11">{action_needed}</td>
                 <td {sev_style}>{severity}</td>

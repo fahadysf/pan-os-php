@@ -6,6 +6,7 @@ UTIL:
 * type=securityprofile | display all predefined profiles
 * type=securityprofile | introduce 'filter=(object is.predefined)'
 * type=zone | introduce 'filter=(object is.visible)' | also to use in type=rule actions=exporttoexcel:rule.html,visibility
+* update HTML_introduction.py - introduce checkbox - Hide rows with 0 instances
 
 BUGFIX:
 * ironskillet - improvement for PAN-OS 10.2 URL
