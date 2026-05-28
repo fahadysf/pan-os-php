@@ -11,6 +11,8 @@ BUGFIX:
 * class ZoneRuleContainer | bugfix to NOT add zone twice
 * class VulnerabilityProfile | update for bestpractice
 * type=securityprofile | correct to read correct predefined-url-filtering
+* type=securityprofile | bugfix to display all predefined objects with actons=exporttoExcel and visibilit|bestpratice
+* type=stats | adjust ZPP calculation only on securityrules allow / enabled
 
 GENERAL:
 * update Device App-ID to version: 9106-10070
