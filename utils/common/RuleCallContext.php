@@ -417,6 +417,48 @@ class RuleCallContext extends CallContext
                 return self::enclose("", $wrap);
         }
 
+        if( $fieldName == 'from-zpp' )
+        {
+            if( method_exists($rule->from, 'isAny'))
+            {
+                if( $rule->from->isAny() )
+                    return self::enclose('**NO ZPP**');
+                $zpp_array = array();
+                foreach($rule->from->getAll() as $zones_to_check)
+                {
+                    /* @var Zone $zones_to_check */
+                    if( $zones_to_check->zoneProtectionProfile != null )
+                        $zpp_array[] = "**ZPP set**";
+                    else
+                        $zpp_array[] = "**NOT ZPP**";
+                }
+                return self::enclose($zpp_array, $wrap);
+            }
+            else
+                return self::enclose("", $wrap);
+        }
+
+        if( $fieldName == 'from-lfp' )
+        {
+            if( method_exists($rule->from, 'isAny'))
+            {
+                if( $rule->from->isAny() )
+                    return self::enclose('**NO zone LFP**');
+                $zpp_array = array();
+                foreach($rule->from->getAll() as $zones_to_check)
+                {
+                    /* @var Zone $zones_to_check */
+                    if( $zones_to_check->logsetting != null )
+                        $zpp_array[] = "**zone LFP set**";
+                    else
+                        $zpp_array[] = "**NO zone LFP**";
+                }
+                return self::enclose($zpp_array, $wrap);
+            }
+            else
+                return self::enclose("", $wrap);
+        }
+
         if( $fieldName == 'to' )
         {
             if( $rule->isPbfRule() && $rule->isInterfaceBased() && $rule->to != null)
