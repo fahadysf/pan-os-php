@@ -207,61 +207,77 @@ class ZoneRuleContainer extends ObjRuleContainer
                     $actualDG = $this->owner->owner->owner;
                     $devices =  $actualDG->getDevicesInGroup(true);
 
-                    $search_f_TStack = null;
+                    $search_f_TStack = array();
                     foreach( $devices as $deviceObj )
                     {
                         /* @var ManagedDevice $managedFirewall*/
                         $managedFirewall = $this->owner->owner->owner->owner->managedFirewallsStore->find($deviceObj['serial']);
 
-                        $search_f_TStack = $managedFirewall->template_stack;
+                        $search_f_TStack[] = $managedFirewall->template_stack;
                     }
 
-                    if( $search_f_TStack !== null )
+                    if( count($search_f_TStack ) > 0 )
                     {
-                        $tmp_devicegroup = $this->owner->owner->owner;
-                        $tmp_panorama = $tmp_devicegroup->owner;
-                        $tmp_TemplateStack = $tmp_panorama->findTemplateStack( $search_f_TStack );
-
-                        /* @var TemplateStack $tmp_TemplateStack */
-                        $tmp_templates = $tmp_TemplateStack->templates;
-
-                        $all = array_merge($tmp_templates, array($tmp_TemplateStack));
-
-                        $zone_added = false;
-                        foreach( $all as $template )
+                        foreach( $search_f_TStack as $search_f_TStackItem )
                         {
-                            /** @var Template|TemplateStack $template */
+                            $tmp_devicegroup = $this->owner->owner->owner;
+                            $tmp_panorama = $tmp_devicegroup->owner;
+                            $tmp_TemplateStack = $tmp_panorama->findTemplateStack($search_f_TStackItem);
 
-                            $all_vsys = $template->deviceConfiguration->getVirtualSystems();
-                            foreach( $all_vsys as $vsys )
+                            /* @var TemplateStack $tmp_TemplateStack */
+                            $tmp_templates = $tmp_TemplateStack->templates;
+
+                            $all = array_merge($tmp_templates, array($tmp_TemplateStack));
+
+                            $zone_added = false;
+                            foreach ($all as $template)
                             {
-                                /** @var VirtualSystem $vsys */
+                                /** @var Template|TemplateStack $template */
 
-                                $tmp_zone = $vsys->zoneStore->find( $node->textContent, $this );
-                                if( $tmp_zone !== null )
+                                $all_vsys = $template->deviceConfiguration->getVirtualSystems();
+                                foreach ($all_vsys as $vsys)
                                 {
-                                    $zone_added = true;
-                                    if( !$this->has($tmp_zone) )
-                                        $this->o[] = $tmp_zone;
-                                    $tmp_zone->addReference($this);
+                                    /** @var VirtualSystem $vsys */
+
+                                    $tmp_zone = $vsys->zoneStore->find($node->textContent, $this);
+                                    if ($tmp_zone !== null)
+                                    {
+                                        $zone_added = true;
+                                        if (!$this->has($tmp_zone))
+                                        {
+                                            $this->o[] = $tmp_zone;
+                                            $tmp_zone->addReference($this);
+                                        }
+                                    }
                                 }
                             }
+
+                            if( !$zone_added )
+                            {
+                                #print "Zone: ".$node->textContent." NOT found \n";
+                            }
+
+
+                            //this is needed to get type=rule 'filter=(from has XZY) - back into working mode
+                            $f = $this->parentCentralStore->findOrCreate($node->textContent, $this);
+                            if (!$this->has($f))
+                            {
+                                $this->o[] = $f;
+                                $f->addReference($this);
+                            }
+
+                            break;
                         }
-
-                        //if( !$zone_added ) {
-                        //this is needed to get type=rule 'filter=(from has XZY) - back into working mode
-                        $f = $this->parentCentralStore->findOrCreate($node->textContent, $this);
-                        if( !$this->has($f) )
-                            $this->o[] = $f;
-                        //}
-
                     }
                     else
                     {
                         //if zone is not found in Template / Template-Stack
                         $f = $this->parentCentralStore->findOrCreate($node->textContent, $this);
                         if( !$this->has($f) )
+                        {
                             $this->o[] = $f;
+                            $f->addReference($this);
+                        }
                     }
                 }
                 else
@@ -269,7 +285,10 @@ class ZoneRuleContainer extends ObjRuleContainer
                     //if NOT Panorama / Device-Group
                     $f = $this->parentCentralStore->findOrCreate($node->textContent, $this);
                     if( !$this->has($f) )
+                    {
                         $this->o[] = $f;
+                        $f->addReference($this);
+                    }
                 }
             }
             else
@@ -277,7 +296,10 @@ class ZoneRuleContainer extends ObjRuleContainer
                 //old Code before 2.1.37
                 $f = $this->parentCentralStore->findOrCreate($node->textContent, $this);
                 if( !$this->has($f) )
+                {
                     $this->o[] = $f;
+                    $f->addReference($this);
+                }
             }
 
             $i++;

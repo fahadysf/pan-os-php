@@ -14,6 +14,7 @@ BUGFIX:
 * type=securityprofile | correct to read correct predefined-url-filtering
 * type=securityprofile | bugfix to display all predefined objects with actons=exporttoExcel and visibilit|bestpratice
 * type=stats | adjust ZPP calculation only on securityrules allow / enabled
+* bugfix class ZoneRuleContainer - no references set for secrule from/to so no ZPP could be calculated
 
 GENERAL:
 * update Device App-ID to version: 9106-10070
