@@ -430,7 +430,7 @@ class RuleCallContext extends CallContext
                     if( $zones_to_check->zoneProtectionProfile != null )
                         $zpp_array[] = "**ZPP set**";
                     else
-                        $zpp_array[] = "**NOT ZPP**";
+                        $zpp_array[] = "**NO ZPP**";
                 }
                 return self::enclose($zpp_array, $wrap);
             }
