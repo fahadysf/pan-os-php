@@ -218,7 +218,7 @@ class SECURITYPROFILEUTIL extends UTIL
                     if( array_search('any', $this->securityProfileTypes) !== FALSE || array_search('predefined-url', $this->securityProfileTypes) !== FALSE )
                         $this->objectsToProcess[] = array('store' => $this->pan->urlStore, 'rules' => $this->pan->urlStore->securityProfiles());
                     if( array_search('any', $this->securityProfileTypes) !== FALSE || array_search('predefined-url-filtering', $this->securityProfileTypes) !== FALSE )
-                        $this->objectsToProcess[] = array('store' => $this->pan->VulnerabilityPredefinedStore, 'rules' => $this->pan->VulnerabilityPredefinedStore->securityProfiles());
+                        $this->objectsToProcess[] = array('store' => $this->pan->UrlFilteringPredefinedStore, 'rules' => $this->pan->UrlFilteringPredefinedStore->securityProfiles());
                     if( array_search('any', $this->securityProfileTypes) !== FALSE || array_search('predefined-virus', $this->securityProfileTypes) !== FALSE )
                         $this->objectsToProcess[] = array('store' => $this->pan->AntiVirusPredefinedStore, 'rules' => $this->pan->AntiVirusPredefinedStore->securityProfiles());
                     if( array_search('any', $this->securityProfileTypes) !== FALSE || array_search('predefined-vulnerability', $this->securityProfileTypes) !== FALSE )

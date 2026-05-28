@@ -10,6 +10,7 @@ BUGFIX:
 * ironskillet - improvement for PAN-OS 10.2 URL
 * class ZoneRuleContainer | bugfix to NOT add zone twice
 * class VulnerabilityProfile | update for bestpractice
+* type=securityprofile | correct to read correct predefined-url-filtering
 
 GENERAL:
 * update Device App-ID to version: 9106-10070

@@ -950,6 +950,7 @@ class SecurityProfileStore extends ObjStore
             if( $appName === FALSE )
                 derr("Predefined Spyware rule name not found\n");
 
+            #print "VP name predefined: ".$appName."\n";
             #DH::DEBUGprintDOMDocument($appx);
             $app = new VulnerabilityProfile( $appName, $this );
             $app->load_from_domxml($appx);
