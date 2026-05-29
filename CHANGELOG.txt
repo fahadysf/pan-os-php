@@ -19,6 +19,7 @@ BUGFIX:
 
 GENERAL:
 * update Device App-ID to version: 9106-10070
+* class ZoneRuleContainer/ObjStore | correct to get old PAN-OS config still working
 
 
 2.1.54 (20260517)

@@ -227,6 +227,9 @@ class ZoneRuleContainer extends ObjRuleContainer
                             $tmp_panorama = $tmp_devicegroup->owner;
                             $tmp_TemplateStack = $tmp_panorama->findTemplateStack($search_f_TStackItem);
 
+                            if( $tmp_TemplateStack == null )
+                                continue;
+
                             /* @var TemplateStack $tmp_TemplateStack */
                             $tmp_templates = $tmp_TemplateStack->templates;
 
