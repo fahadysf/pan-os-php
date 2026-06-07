@@ -3,6 +3,7 @@ CHANGELOG
 2.1.56
 UTIL:
 * type=rule | introduce 'filter=(name is.in.csv-report-file XYZ)'
+* type=device | new actions=threat-report-bp-change-plan:FILENAME.csv in=api://MGTM-IP
 
 BUGFIX:
 

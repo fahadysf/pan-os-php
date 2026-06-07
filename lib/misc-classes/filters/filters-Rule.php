@@ -3694,7 +3694,8 @@ RQuery::$defaultFilters['rule']['name']['operators']['is.in.csv-report-file'] = 
                 if( strlen($line) == 0 )
                     continue;
                 $line_exploded = explode(",", $line);
-                $list[$line_exploded[0]] = TRUE;
+                $text = str_replace('"', '', $line_exploded[0]);
+                $list[$text] = TRUE;
             }
 
             $context->cachedList = &$list;

@@ -5087,6 +5087,53 @@ DeviceCallContext::$supportedActions['rename-wrong-characters'] = array(
     },
     'args' => array(
         'enable' => array('type' => 'string', 'default' => 'no')
-        ),
-        'help' => "enable function: possible values: 'yes' or 'no'"
+    ),
+    'help' => "enable function: possible values: 'yes' or 'no'"
 );
+
+DeviceCallContext::$supportedActions['threat-report-bp-change-plan'] = array(
+    'name' => 'threat-report-bp-change-plan',
+    'GlobalInitFunction' => function (DeviceCallContext $context) {
+        $context->first = true;
+    },
+    'MainFunction' => function (DeviceCallContext $context)
+    {
+        $vsys = $context->object;
+
+        $csvFileName = $context->arguments['csvfilename'];
+
+        if( $context->first )
+        {
+            if( get_class($vsys) !== "DeviceGroup" and get_class($vsys) !== "VirtualSystem" )
+                derr( "only working for DeviceGroups or VirtualSystems", null, false );
+
+            $report = $vsys->owner->API_getThreats_BP_changeplan();
+
+            if( !empty($report) )
+            {
+                $out = fopen($csvFileName, 'w');
+                fputcsv($out, array_keys($report[0]), ",", '"', "");
+                foreach ($report as $fields)
+                    fputcsv($out, $fields, ",", '"',"");
+
+                fclose($out);
+            }
+            else
+            {
+                //empty file with:
+                $string = "rule,action,count\n";
+                file_put_contents($csvFileName, $string);
+            }
+
+
+            $context->first = false;
+        }
+
+    },
+    'args' => array(
+        'csvfilename' => array('type' => 'string', 'default' => 'bp_threat_report.csv')
+    ),
+    'help' => "enable function: possible values: 'yes' or 'no'"
+);
+
+
