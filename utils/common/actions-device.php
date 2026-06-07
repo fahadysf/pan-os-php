@@ -5101,13 +5101,20 @@ DeviceCallContext::$supportedActions['threat-report-bp-change-plan'] = array(
         $vsys = $context->object;
 
         $csvFileName = $context->arguments['csvfilename'];
+        $timeRange = $context->arguments['days'];
 
         if( $context->first )
         {
             if( get_class($vsys) !== "DeviceGroup" and get_class($vsys) !== "VirtualSystem" )
                 derr( "only working for DeviceGroups or VirtualSystems", null, false );
 
-            $report = $vsys->owner->API_getThreats_BP_changeplan();
+            $time_validation = array( "30", "60", "90" );
+            if( !in_array( $timeRange, $time_validation ) )
+                derr( "possible values for days argument: ".implode(", ", $time_validation), null, false );
+
+            $timePeriod = 'last-'.$timeRange.'-days';
+
+            $report = $vsys->owner->API_getThreats_BP_changeplan( $timePeriod );
 
             if( !empty($report) )
             {
@@ -5131,7 +5138,8 @@ DeviceCallContext::$supportedActions['threat-report-bp-change-plan'] = array(
 
     },
     'args' => array(
-        'csvfilename' => array('type' => 'string', 'default' => 'bp_threat_report.csv')
+        'csvfilename' => array('type' => 'string', 'default' => 'bp_threat_report.csv'),
+        'days' => array('type' => 'string', 'default' => '30')
     ),
     'help' => "enable function: possible values: 'yes' or 'no'"
 );
