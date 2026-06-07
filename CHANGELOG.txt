@@ -1,6 +1,14 @@
 CHANGELOG
 
-2.1.55
+2.1.56
+UTIL:
+
+BUGFIX:
+
+GENERAL:
+
+
+2.1.55 (20260607)
 UTIL:
 * type=rule | extend secprof information with [predefined] - new 'filter=(secprof has.predefined)'
 * type=securityprofile | display all predefined profiles
