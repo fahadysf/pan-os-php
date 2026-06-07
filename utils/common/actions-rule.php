@@ -5054,6 +5054,8 @@ RuleCallContext::$supportedActions[] = array(
         $bestPractice = FALSE;
         $visibility = FALSE;
         $adoption = FALSE;
+        $visibility_from_zpp = FALSE;
+        $visibility_from_lfp = FALSE;
 
         $optionalFields = &$context->arguments['additionalFields'];
 
@@ -5077,6 +5079,10 @@ RuleCallContext::$supportedActions[] = array(
             $visibility = TRUE;
         if( isset($optionalFields['Adoption']) )
             $adoption = TRUE;
+        if( isset($optionalFields['Visibility-from-ZPP']) )
+            $visibility_from_zpp = TRUE;
+        if( isset($optionalFields['Visibility-from-LFP']) )
+            $visibility_from_lfp = TRUE;
 
         $fields = array(
             'ID' => 'ID',
@@ -5090,6 +5096,9 @@ RuleCallContext::$supportedActions[] = array(
             'tag' => 'tags',
             'grouptag' => 'grouptags',
             'from' => 'from',
+            'from-visible' => 'from-visible',
+            'from-zpp' => 'from-zpp',
+            'from-lfp' => 'from-lfp',
             'to' => 'to',
             'src_negated' => 'source_negated',
             'src' => 'source',
@@ -5325,7 +5334,7 @@ RuleCallContext::$supportedActions[] = array(
                         $continue = true;
                     }
                     elseif(
-                        ($fieldName == 'sp_av_visible' || $fieldName == 'sp_as_visible' || $fieldName == 'sp_vp_visible'
+                        ($fieldName == 'from-visible' || $fieldName == 'sp_av_visible' || $fieldName == 'sp_as_visible' || $fieldName == 'sp_vp_visible'
                             || $fieldName == 'sp_url_visible' || $fieldName == 'sp_file_visible' || $fieldName == 'sp_data_visible'
                             || $fieldName == 'sp_wf_visible'
                             || $fieldName == 'sp_dns_sec_visible' || $fieldName == 'sp_av_and_wf_visible'
@@ -5335,6 +5344,26 @@ RuleCallContext::$supportedActions[] = array(
                     )
                     {
                         $continue_text = "continue13";
+                        $continue = true;
+                    }
+                    elseif(
+                        ($fieldName == 'from-zpp'
+                        )
+                        &&
+                        (!$visibility || !$visibility_from_zpp || !$context->arguments['tmp_secrule'] )
+                    )
+                    {
+                        $continue_text = "continue13b";
+                        $continue = true;
+                    }
+                    elseif(
+                        ($fieldName == 'from-lfp'
+                        )
+                        &&
+                        (!$visibility || !$visibility_from_lfp || !$context->arguments['tmp_secrule'] )
+                    )
+                    {
+                        $continue_text = "continue13c";
                         $continue = true;
                     }
                     elseif(
@@ -5569,7 +5598,7 @@ RuleCallContext::$supportedActions[] = array(
                 $continue = true;
             }
             elseif(
-                ($fieldName == 'sp_av_visible' || $fieldName == 'sp_as_visible' || $fieldName == 'sp_vp_visible'
+                ($fieldName == 'from-visible' || $fieldName == 'sp_av_visible' || $fieldName == 'sp_as_visible' || $fieldName == 'sp_vp_visible'
                         || $fieldName == 'sp_url_visible' || $fieldName == 'sp_file_visible' || $fieldName == 'sp_data_visible'
                         || $fieldName == 'sp_wf_visible'
                         || $fieldName == 'sp_av_and_wf_visible' || $fieldName == 'sp_dns_sec_visible'
@@ -5579,6 +5608,26 @@ RuleCallContext::$supportedActions[] = array(
             )
             {
                 $continue_text = "continue13";
+                $continue = true;
+            }
+            elseif(
+                ($fieldName == 'from-zpp'
+                )
+                &&
+                (!$visibility || !$visibility_from_zpp || !$context->arguments['tmp_secrule'] )
+            )
+            {
+                $continue_text = "continue13b";
+                $continue = true;
+            }
+            elseif(
+                ($fieldName == 'from-lfp'
+                )
+                &&
+                (!$visibility || !$visibility_from_lfp || !$context->arguments['tmp_secrule'] )
+            )
+            {
+                $continue_text = "continue13c";
                 $continue = true;
             }
             elseif(
@@ -5694,7 +5743,7 @@ RuleCallContext::$supportedActions[] = array(
             array('type' => 'pipeSeparatedList',
                 'subtype' => 'string',
                 'default' => '*NONE*',
-                'choices' => array('ResolveAddressSummary', 'ResolveServiceSummary', 'ResolveServiceAppDefaultSummary', 'ResolveApplicationSummary', 'ResolveScheduleSummary', 'ApplicationSeen', 'HitCount', 'BestPractice', 'Visibility', 'Adoption'),
+                'choices' => array('ResolveAddressSummary', 'ResolveServiceSummary', 'ResolveServiceAppDefaultSummary', 'ResolveApplicationSummary', 'ResolveScheduleSummary', 'ApplicationSeen', 'HitCount', 'BestPractice', 'Visibility', 'Adoption', "Visibility-from-ZPP", "Visibility-from-LFP"),
                 'help' => "example: 'actions=exporttoexcel:file.html,HitCount|ApplicationSeen'\n" .
                     "pipe(|) separated list of additional field to include in the report. The following is available:\n" .
                     "  - ResolveAddressSummary : fields with address objects will be resolved to IP addressed and summarized in a new column\n" .

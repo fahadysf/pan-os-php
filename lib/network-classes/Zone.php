@@ -683,6 +683,15 @@ class Zone
         return $ret;
     }
 
+    public function isVisible()
+    {
+        #if( $this->zoneProtectionProfile != NULL && $this->logsetting != NULL )
+        if( $this->zoneProtectionProfile != NULL )
+            return true;
+
+        return false;
+    }
+
     public function &getXPath()
     {
         if( $this->isTmp() )

@@ -72,6 +72,9 @@ class ObjStore
     #NEW - protected function findByName($name, $ref = null, $nested = FALSE)
     protected function findByName($name, $ref = null, $nested = TRUE)
     {
+        if($name == null)
+            return null;
+
         if( isset($this->nameIndex[$name]) )
         {
             $o = $this->nameIndex[$name];

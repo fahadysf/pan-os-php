@@ -42,7 +42,7 @@ def main():
     with open(json_config_path, 'r') as f:
         data = json.load(f)
 
-    # UPDATED TEMPLATE: Added Legend Rows and expanded CSS
+    # UPDATED TEMPLATE: Added onload trigger to <body> and 'checked' attribute to <input>
     html_template = """
     <!DOCTYPE html>
     <html>
@@ -69,9 +69,51 @@ def main():
             .high {{ background-color: #ff6d01; }}
             .medium {{ background-color: #fcab70; }}
             .low {{ background-color: #ffff00; }}
+
+            /* Checkbox container style matched to 8pt (same size as column 1) */
+            .filter-container {{
+                margin-bottom: 15px;
+                font-size: 8pt;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+            }}
+            /* Resizes the physical checkbox box slightly to match smaller text nicely */
+            .filter-container input[type="checkbox"] {{
+                width: 11px;
+                height: 11px;
+                margin: 0 5px 0 0;
+                vertical-align: middle;
+            }}
         </style>
+        <script>
+            function toggleZeroRows() {{
+                var checkbox = document.getElementById("hideZeroCheckbox");
+                var rows = document.querySelectorAll(".data-row");
+
+                rows.forEach(function(row) {{
+                    var countCell = row.getElementsByClassName("instance-count")[0];
+                    if (countCell) {{
+                        var count = parseInt(countCell.textContent.trim(), 10);
+                        if (count === 0) {{
+                            if (checkbox.checked) {{
+                                row.style.display = "none";
+                            }} else {{
+                                row.style.display = "";
+                            }}
+                        }}
+                    }}
+                }});
+            }}
+        </script>
     </head>
-    <body>
+    <body onload="toggleZeroRows()">
+        <div class="filter-container">
+            <label style="display: flex; align-items: center;">
+                <input type="checkbox" id="hideZeroCheckbox" onchange="toggleZeroRows()" checked> Hide rows with 0 instances
+            </label>
+        </div>
+
         <table class="waffle" cellspacing="0" cellpadding="0">
             <tbody>
                 <tr style="height: 16px">
@@ -123,9 +165,9 @@ def main():
                 sev_style = 'class="s11"'
 
             rows_content += f"""
-            <tr>
+            <tr class="data-row">
                 <td class="s9">{sheet_name}</td>
-                <td class="s11">{instances}</td>
+                <td class="s11 instance-count">{instances}</td>
                 <td class="s11">{explanation}</td>
                 <td class="s11">{action_needed}</td>
                 <td {sev_style}>{severity}</td>

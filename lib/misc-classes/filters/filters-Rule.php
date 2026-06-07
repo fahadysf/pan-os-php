@@ -2963,6 +2963,34 @@ RQuery::$defaultFilters['rule']['secprof']['operators']['has.from.query'] = arra
     'help' => 'example: \'filter=(secprof has.from.query subquery1)\' \'subquery1=(av is.best-practice)\'',
 );
 
+RQuery::$defaultFilters['rule']['secprof']['operators']['has.predefined'] = array(
+    'Function' => function (RuleRQueryContext $context) {
+        $secprofgroup = $context->object;
+        $rule = $context->object;
+        if( !$rule->isSecurityRule() && !$rule->isDefaultSecurityRule() )
+            return FALSE;
+
+        if( $rule->securityProfileType() == "group" )
+            return null;
+
+        $profiles = $rule->securityProfiles();
+        foreach( $profiles as $key => $profile )
+        {
+            if( is_object($profile) )
+            {
+                if( str_contains($profile->owner->name(), "predefined") )
+                    return TRUE;
+            }
+        }
+
+        return FALSE;
+    },
+    'arg' => FALSE,
+    'ci' => array(
+        'fString' => '(%PROP% av-production)',
+        'input' => 'input/panorama-8.0.xml'
+    )
+);
 //                                              //
 //                Other properties              //
 //                                              //

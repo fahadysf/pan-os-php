@@ -950,6 +950,7 @@ class SecurityProfileStore extends ObjStore
             if( $appName === FALSE )
                 derr("Predefined Spyware rule name not found\n");
 
+            #print "VP name predefined: ".$appName."\n";
             #DH::DEBUGprintDOMDocument($appx);
             $app = new VulnerabilityProfile( $appName, $this );
             $app->load_from_domxml($appx);
@@ -1221,8 +1222,10 @@ class SecurityProfileStore extends ObjStore
         $this->o[] = $f;
         $this->nameIndex[$name] = $f;
         $f->type = 'tmp';
+        $f->type = $f::TypeTmp;
         $f->addReference($ref);
 
+        /*
         if( $f->xmlroot == null )
         {
             if( $this->xmlroot == null )
@@ -1232,6 +1235,7 @@ class SecurityProfileStore extends ObjStore
             $f->xmlroot = DH::createElement( $this->xmlroot, 'entry');
             $f->xmlroot->setAttribute("name", $name);
         }
+        */
 
         return $f;
     }

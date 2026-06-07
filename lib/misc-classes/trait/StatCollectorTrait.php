@@ -1091,7 +1091,8 @@ trait StatCollectorTrait
         $filter_array = array('query' => $generalFilter_allow."(secprof has.from.query subquery1)", 'subquery1' => "wf is.adoption" );
         $stdoutarray['wf adoption'] = count( $sub_ruleStore->rules( $filter_array ) );
 
-        $filter_array = array('query' => $generalFilter."!(from is.any) and (from all.has.from.query subquery1)", 'subquery1' => "zpp is.set" );
+        //zone LFP is not needed so that this is visible
+        $filter_array = array('query' => $generalFilter_allow."!(from is.any) and (from all.has.from.query subquery1)", 'subquery1' => "zpp is.set" );
         $stdoutarray['zone protection'] = count( $sub_ruleStore->rules( $filter_array ) );
 
         $stdoutarray['app id'] = count( $sub_ruleStore->rules( $generalFilter_allow."!(app is.any)" ) );
@@ -1245,7 +1246,7 @@ trait StatCollectorTrait
         $workingArray[] = array( 'wf best-practice mica-engine', $ruleForCalculation);
         $workingArray[] = array( 'wf adoption', $ruleForCalculation);
 
-        $workingArray[] = array( 'zone protection', 'security rules enabled');
+        $workingArray[] = array( 'zone protection', $ruleForCalculation);
         $workingArray[] = array( 'app id', $ruleForCalculation);
         $workingArray[] = array( 'user id', 'security rules enabled');
         $workingArray[] = array( 'service port', $ruleForCalculation);

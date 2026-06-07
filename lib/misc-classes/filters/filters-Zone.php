@@ -61,6 +61,16 @@ RQuery::$defaultFilters['zone']['object']['operators']['is.tmp'] = array(
         'input' => 'input/panorama-8.0.xml'
     )
 );
+RQuery::$defaultFilters['zone']['object']['operators']['is.visible'] = array(
+    'Function' => function (ZoneRQueryContext $context) {
+        return $context->object->isVisible();
+    },
+    'arg' => FALSE,
+    'ci' => array(
+        'fString' => '(%PROP%)',
+        'input' => 'input/panorama-8.0.xml'
+    )
+);
 RQuery::$defaultFilters['zone']['name']['operators']['eq'] = array(
     'Function' => function (ZoneRQueryContext $context) {
         return $context->object->name() == $context->value;

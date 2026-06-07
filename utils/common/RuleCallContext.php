@@ -397,6 +397,90 @@ class RuleCallContext extends CallContext
                 return self::enclose("", $wrap);
         }
 
+        if( $fieldName == 'from-visible' )
+        {
+            if( method_exists($rule->from, 'isAny'))
+            {
+                if( $rule->from->isAny() )
+                    return self::enclose('**NOT visible**');
+                $zpp_array = array();
+                foreach($rule->from->getAll() as $zones_to_check)
+                {
+                    /* @var Zone $zones_to_check */
+                    if( $zones_to_check->isVisible() )
+                    {
+                        $zpp_array[] = "**visible**";
+                    }
+                    else
+                    {
+                        if( $zones_to_check->type() == "tmp" )
+                            $zpp_array[] = "**TMP zone - NOT visible**";
+                        else
+                            $zpp_array[] = "**NOT visible**";
+                    }
+
+                }
+                return self::enclose($zpp_array, $wrap);
+            }
+            else
+                return self::enclose("", $wrap);
+        }
+
+        if( $fieldName == 'from-zpp' )
+        {
+            if( method_exists($rule->from, 'isAny'))
+            {
+                if( $rule->from->isAny() )
+                    return self::enclose('**NO ZPP**');
+                $zpp_array = array();
+                foreach($rule->from->getAll() as $zones_to_check)
+                {
+                    /* @var Zone $zones_to_check */
+                    if( $zones_to_check->zoneProtectionProfile != null )
+                        $zpp_array[] = "**ZPP set**";
+                    else
+                    {
+                        if( $zones_to_check->type() == "tmp" )
+                            $zpp_array[] = "**TMP zone - NO ZPP**";
+                        else
+                            $zpp_array[] = "**NO ZPP**";
+                    }
+
+                }
+                return self::enclose($zpp_array, $wrap);
+            }
+            else
+                return self::enclose("", $wrap);
+        }
+
+        if( $fieldName == 'from-lfp' )
+        {
+            if( method_exists($rule->from, 'isAny'))
+            {
+                if( $rule->from->isAny() )
+                    return self::enclose('**NO zone LFP**');
+                $zpp_array = array();
+                foreach($rule->from->getAll() as $zones_to_check)
+                {
+                    /* @var Zone $zones_to_check */
+                    if( $zones_to_check->logsetting != null )
+                        $zpp_array[] = "**zone LFP set**";
+                    else
+                    {
+                        if( $zones_to_check->type() == "tmp" )
+                            $zpp_array[] = "**TMP zone - NO zone LFP**";
+                        else
+
+                            $zpp_array[] = "**NO zone LFP**";
+                    }
+
+                }
+                return self::enclose($zpp_array, $wrap);
+            }
+            else
+                return self::enclose("", $wrap);
+        }
+
         if( $fieldName == 'to' )
         {
             if( $rule->isPbfRule() && $rule->isInterfaceBased() && $rule->to != null)
@@ -1535,7 +1619,10 @@ class RuleCallContext extends CallContext
                                 $bp_check .= $adoption_NOT_sign;
                         }
                     }
-                    $profiles[] = $profType . ':' . $profile->name().$bp_check;
+                    if( str_contains( $profile->owner->name(), "predefined" ) )
+                        $profiles[] = $profType . ':' . $profile->name()."[predefined]".$bp_check;
+                    else
+                        $profiles[] = $profType . ':' . $profile->name().$bp_check;
                 }
             }
             else
@@ -1679,7 +1766,13 @@ class RuleCallContext extends CallContext
             if( !is_object($profileName) )
                 return self::enclose( $profileName, $wrap );
             else
-                return self::enclose( $profileName->name(), $wrap );
+            {
+                if( str_contains( $profileName->owner->name(), "predefined" ) )
+                    return self::enclose( $profileName->name()."[predefined]", $wrap );
+                else
+                    return self::enclose( $profileName->name(), $wrap );
+            }
+
         }
 
         return self::enclose( '' );
