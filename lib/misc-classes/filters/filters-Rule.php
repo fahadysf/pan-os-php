@@ -3670,6 +3670,44 @@ RQuery::$defaultFilters['rule']['name']['operators']['has.wrong.characters'] = a
     )
 );
 
+RQuery::$defaultFilters['rule']['name']['operators']['is.in.csv-report-file'] = array(
+    'Function' => function (RuleRQueryContext $context) {
+        $object = $context->object;
+
+        if( !isset($context->cachedList) )
+        {
+            if( !file_exists($context->value) )
+                derr("cannot find file '{$context->value}'", null, FALSE);
+
+            $text = file_get_contents($context->value);
+
+            if( $text === FALSE )
+                derr("cannot open file '{$context->value}");
+
+            $lines = explode("\n", $text);
+            foreach( $lines as $key => $line )
+            {
+                if($key == 0)
+                    continue;
+
+                $line = trim($line);
+                if( strlen($line) == 0 )
+                    continue;
+                $line_exploded = explode(",", $line);
+                $list[$line_exploded[0]] = TRUE;
+            }
+
+            $context->cachedList = &$list;
+        }
+        else
+            $list = &$context->cachedList;
+
+        return isset($list[$object->name()]);
+    },
+    'arg' => TRUE,
+    'help' => 'returns TRUE if rule name matches one of the names found in text file provided in argument'
+);
+
 //                                              //
 //                UserID properties             //
 //                                              //

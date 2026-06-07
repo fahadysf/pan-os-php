@@ -2,6 +2,7 @@ CHANGELOG
 
 2.1.56
 UTIL:
+* type=rule | introduce 'filter=(name is.in.csv-report-file XYZ)'
 
 BUGFIX:
 
