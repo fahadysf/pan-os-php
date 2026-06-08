@@ -7,7 +7,7 @@ UTIL:
 
 BUGFIX:
 * type=securityprofile actions=vulnerability.rules.alert-only-set | to cover corner case
-* type=rule ruletype=defaultsecurity actions=exporttoexcel | also add SPG/SP info
+* type=rule ruletype=defaultsecurity actions=exporttoexcel | bugfix to add SP info corner case
 
 GENERAL:
 
