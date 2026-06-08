@@ -2445,11 +2445,19 @@ DeviceCallContext::$commonActionFunctions['sp_spg-create'] = array(
         elseif( $context->object->owner->version >= 100 and $context->object->owner->version < 112 )
         {
             $context->av_xmlString = file_get_contents( $pathString."/panos_v".$panVersion."/templates/panorama/snippets/profiles_virus.xml");
-            $context->as_xmlString = file_get_contents( $pathString."/panos_v".$panVersion."/templates/panorama/snippets/profiles_spyware.xml");
+
+            if( $context->subSystem->isBuckbeak() )
+                $context->as_xmlString = file_get_contents( $pathString."/panos_v11.1/templates/panorama/snippets/profiles_spyware_scm.xml");
+            else
+                $context->as_xmlString = file_get_contents( $pathString."/panos_v".$panVersion."/templates/panorama/snippets/profiles_spyware.xml");
+
             $context->vp_xmlString = file_get_contents( $pathString."/panos_v".$panVersion."/templates/panorama/snippets/profiles_vulnerability.xml");
             $context->url_xmlString = file_get_contents( $pathString."/panos_v".$panVersion."/templates/panorama/snippets/profiles_url_filtering.xml");
             $context->fb_xmlString = file_get_contents( $pathString."/panos_v".$panVersion."/templates/panorama/snippets/profiles_file_blocking.xml");
             $context->wf_xmlString = file_get_contents( $pathString."/panos_v".$panVersion."/templates/panorama/snippets/profiles_wildfire_analysis.xml");
+
+            $context->avwf_xmlString = file_get_contents( $pathString."/panos_v11.1/templates/panorama/snippets/profiles_virus_and_wildfire.xml");
+            $context->dnssec_xmlString = file_get_contents( $pathString."/panos_v11.1/templates/panorama/snippets/profiles_dns_security.xml");
         }
         elseif( $context->object->owner->version >= 112 and $context->object->owner->version < 121 )
         {
@@ -2552,6 +2560,9 @@ DeviceCallContext::$supportedActions['sp_spg-create-alert-only-BP'] = array(
         $context->fb_xmlString = "";
         $context->wf_xmlString = "";
 
+        $context->avwf_xmlString = "";
+        $context->dnssec_xmlString = "";
+
         if( $context->subSystem->isPanorama() )
         {
             $countDG = count( $context->subSystem->getDeviceGroups() );
@@ -2572,7 +2583,7 @@ DeviceCallContext::$supportedActions['sp_spg-create-alert-only-BP'] = array(
             $f = DeviceCallContext::$commonActionFunctions['sp_spg-create']['function_xmlfiles'];
             $f($context);
 
-            if( $classtype == "VirtualSystem" || $classtype == "DeviceGroup" )
+            if( $classtype == "VirtualSystem" || $classtype == "DeviceGroup" || $classtype == "Container" )
             {
                 $sub = $object;
 
@@ -2589,10 +2600,21 @@ DeviceCallContext::$supportedActions['sp_spg-create-alert-only-BP'] = array(
                         else
                             $sharedStore = $sub;
                     }
-                    else
+                    elseif( $context->subSystem->isPanorama() )
                     {
                         //Panorama
                         $sharedStore = $sub->owner;
+                    }
+                    elseif( $context->subSystem->isBuckbeak() )
+                    {
+                        if( $sub->name() == "All" )
+                            $sharedStore = $sub;
+                        else
+                            derr( "SCM has Container All - but trying to create SP/SPG at: ".$sub->name(),null, false );
+                    }
+                    else
+                    {
+                        derr( get_class($context->subSystem)." not yet supported", null, false );
                     }
                 }
                 else
@@ -2624,7 +2646,10 @@ DeviceCallContext::$supportedActions['sp_spg-create-alert-only-BP'] = array(
 
                     $f = DeviceCallContext::$commonActionFunctions['sp_spg-create']['function_createProfile-alert'];
 
-                    $av = $f($context, 'AntiVirusProfileStore', 'AV', $sharedStore, $name, 'av_xmlString', $ownerDocument);
+                    if( !$context->subSystem->isBuckbeak() )
+                        $av = $f($context, 'AntiVirusProfileStore', 'AV', $sharedStore, $name, 'av_xmlString', $ownerDocument);
+                    else
+                        $av = null;
 
                     $as = $f($context, 'AntiSpywareProfileStore', 'AS', $sharedStore, $name, 'as_xmlString', $ownerDocument);
 
@@ -2634,8 +2659,20 @@ DeviceCallContext::$supportedActions['sp_spg-create-alert-only-BP'] = array(
 
                     $fb = $f($context, 'FileBlockingProfileStore', 'FB', $sharedStore, $name, 'fb_xmlString', $ownerDocument);
 
-                    $wf = $f($context, 'WildfireProfileStore', 'WF', $sharedStore, $name, 'wf_xmlString', $ownerDocument);
+                    if( !$context->subSystem->isBuckbeak() )
+                        $wf = $f($context, 'WildfireProfileStore', 'WF', $sharedStore, $name, 'wf_xmlString', $ownerDocument);
+                    else
+                        $wf = null;
 
+                    $avwf = null;
+                    $dnsSec = null;
+                    if( $context->subSystem->isBuckbeak() )
+                    {
+                        //avwf
+                        $avwf = $f($context, 'VirusAndWildfireProfileStore', 'AVWF', $sharedStore, $name, 'avwf_xmlString', $ownerDocument);
+                        //dnssecurity
+                        $dnsSec = $f($context, 'DNSSecurityProfileStore', 'DNSSEC', $sharedStore, $name, 'dnssec_xmlString', $ownerDocument);
+                    }
 
                     $secprofgrp = $sharedStore->securityProfileGroupStore->find($name);
                     if( $secprofgrp === null )
@@ -2674,6 +2711,16 @@ DeviceCallContext::$supportedActions['sp_spg-create-alert-only-BP'] = array(
                             $secprofgrp->setSecProf_Wildfire($wf->name());
                         }
 
+                        if( $avwf !== null )
+                        {
+                            PH::print_stdout("   - add AVWF: '".$avwf->name()."'");
+                            $secprofgrp->setSecProf_AVWF($avwf->name());
+                        }
+                        if( $dnsSec !== null )
+                        {
+                            PH::print_stdout("   - add DNSsec: '".$dnsSec->name()."'");
+                            $secprofgrp->setSecProf_DNSSEC($dnsSec->name());
+                        }
 
                         $sharedStore->securityProfileGroupStore->addSecurityProfileGroup($secprofgrp);
 

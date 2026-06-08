@@ -5,6 +5,7 @@ UTIL:
 * type=rule | introduce 'filter=(name is.in.csv-report-file XYZ)'
 * type=device | new actions=threat-report-bp-change-plan:FILENAME.csv in=api://MGTM-IP
 * type=zone-protection-profile actions=display/exporttoexcel | extend with additional fields
+* type=device actions=sp_spg-create-alert-only-BP | extend for SCM
 
 BUGFIX:
 * type=securityprofile actions=vulnerability.rules.alert-only-set | to cover corner case
