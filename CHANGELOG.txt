@@ -6,6 +6,7 @@ UTIL:
 * type=device | new actions=threat-report-bp-change-plan:FILENAME.csv in=api://MGTM-IP
 
 BUGFIX:
+* bugfix | type=securityprofile actions=vulnerability.rules.alert-only-set | to cover corner case
 
 GENERAL:
 

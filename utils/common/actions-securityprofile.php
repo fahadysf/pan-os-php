@@ -3323,14 +3323,18 @@ SecurityProfileCallContext::$supportedActions['vulnerability.inline-ml.alert-onl
     }
 );
 
-SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set'] = array(
-    'name' => 'vulnerability.rules.alert-only-set',
+SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set_OLD'] = array(
+    'name' => 'vulnerability.rules.alert-only-set_OLD',
     'MainFunction' => function (SecurityProfileCallContext $context )
     {
         $object = $context->object;
 
         if (get_class($object) !== "VulnerabilityProfile")
             return null;
+
+        $object->vulnerability_rules_coverage();
+
+        print_r($object->rule_coverage);
 
         $sp_severity = array();
         foreach( $object->rules_obj as $rule )
@@ -3363,24 +3367,33 @@ SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-se
         $sp_severity_default = array( "any", "critical", "high", "medium", "low", "informational" );
         $result = array_diff($sp_severity_default, $sp_severity);
 
-        if( !in_array("any", $sp_severity) )
+        if( !in_array("any", $sp_severity) ||
+            ( isset($object->rule_coverage["any"]['any'] ) && $object->rule_coverage["any"]['any']['threat-name'] != "any"  ||
+              isset($object->rule_coverage["any"]['client'] ) && $object->rule_coverage["any"]['client']['threat-name'] != "any"  ||
+              isset($object->rule_coverage["any"]['server'] ) && $object->rule_coverage["any"]['server']['threat-name'] != "any"
+            )
+        )
         {
             if( !empty($result) )
             {
                 if( in_array("any", $result) )
                 {
-                    foreach ($result as $rule)
+                    foreach ($result as $severity)
                     {
                         //Todo: bug if threat-name != any
-                        if ($rule == "any")
+                        if ($severity == "any")
+                        {
+                            print "continue\n";
                             continue;
+                        }
+
 
                         $threadPolicy_obj = new ThreatPolicyVulnerability($rule, $object);
                         $threadPolicy_obj->type = "ThreatPolicyVulnerability";
 
-                        if( $rule == "critical" || $rule == "high" || $rule == "medium" )
+                        if( $severity == "critical" || $severity == "high" || $severity == "medium" )
                             $threadPolicy_obj->action = "alert";
-                        elseif( $rule == "low" || $rule == "informational" )
+                        elseif( $severity == "low" || $severity == "informational" )
                             $threadPolicy_obj->action = "default";
 
                         $object->rules_obj[] = $threadPolicy_obj;
@@ -3388,7 +3401,7 @@ SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-se
 
                         $object->owner->owner->ThreatPolicyStore->add($threadPolicy_obj);
 
-                        $threadPolicy_obj->newThreatPolicyXML($object->xmlroot, $rule, $rule, $threadPolicy_obj->action);
+                        $threadPolicy_obj->newThreatPolicyXML($object->xmlroot, $severity, $severity, $threadPolicy_obj->action);
 
                         $sendAPI = true;
                     }
@@ -3400,12 +3413,19 @@ SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-se
                     continue;
 
                 $object->vulnerability_rules_coverage();
-                if( !isset($object->rule_coverage[$severity]['any']) )
+                if( !isset($object->rule_coverage[$severity]['any']) ||
+                    ( isset($object->rule_coverage[$severity]['any'] ) && $object->rule_coverage[$severity]['any']['category'] != "any"  ||
+                        isset($object->rule_coverage[$severity]['client'] ) && $object->rule_coverage[$severity]['client']['category'] != "any"  ||
+                        isset($object->rule_coverage[$severity]['server'] ) && $object->rule_coverage[$severity]['server']['category'] != "any"
+                    )
+                )
                 {
                     $host_types = array("client", "server");
                     foreach($host_types as $host_type)
                     {
-                        if( !isset($object->rule_coverage[$severity][$host_type]))
+                        if( !isset($object->rule_coverage[$severity][$host_type]) ||
+                            isset($object->rule_coverage[$severity][$host_type]) && $object->rule_coverage[$severity][$host_type]['category'] != "any"
+                        )
                         {
                             $threadPolicy_obj = new ThreatPolicyVulnerability($severity."_".$host_type, $object);
                             $threadPolicy_obj->type = "ThreatPolicyVulnerability";
@@ -3426,12 +3446,155 @@ SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-se
 
                             $sendAPI = true;
                         }
+                        else
+                        {
+                            print "severity already set: ".$severity."\n";
+                        }
                     }
                 }
             }
         }
+        else
+        {
+            print "exit as any is available as severity\n";
+        }
     }
 );
+
+SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set'] = array(
+    'name' => 'vulnerability.rules.alert-only-set',
+    'MainFunction' => function (SecurityProfileCallContext $context)
+    {
+        $object = $context->object;
+
+        if (get_class($object) !== "VulnerabilityProfile") {
+            return null;
+        }
+
+        // 1. Normalize existing rules to "alert" if they are set to "allow"
+        $sp_severity = array();
+        foreach ($object->rules_obj as $rule)
+        {
+            /** @var ThreatPolicy $rule */
+            $sp_severity = array_merge($sp_severity, $rule->severity());
+
+            if ($rule->action() === "allow")
+            {
+                $rule->action = "alert";
+
+                $tmp = DH::findFirstElement("action", $rule->xmlroot);
+                if ($tmp !== false)
+                {
+                    $tmp_action = DH::firstChildElement($tmp);
+                    if ($tmp_action !== false)
+                    {
+                        $tmp->removeChild($tmp_action);
+                        $xmlElement = DH::importXmlStringOrDie($rule->xmlroot->ownerDocument, '<alert/>');
+                        $tmp->appendChild($xmlElement);
+                        $sendAPI = true;
+                    }
+                }
+            }
+        }
+
+        // Calculate initial rule coverage once to avoid high-overhead calls inside loops
+        $object->vulnerability_rules_coverage();
+
+        // 2. Check if a clean global 'any' severity catch-all rule exists
+        $hasValidAnySeverity = false;
+        if (in_array("any", $sp_severity))
+        {
+            $anyCoverage = $object->rule_coverage['any'] ?? [];
+            $hasInvalidAnyThreat = false;
+
+            foreach (['any', 'client', 'server'] as $hostType)
+            {
+                if (isset($anyCoverage[$hostType]) && $anyCoverage[$hostType]['threat-name'] !== 'any')
+                {
+                    $hasInvalidAnyThreat = true;
+                    break;
+                }
+            }
+            if (!$hasInvalidAnyThreat)
+            {
+                $hasValidAnySeverity = true;
+            }
+        }
+
+        // 3. Process missing coverages if 'any' isn't explicitly handling it cleanly
+        if (!$hasValidAnySeverity)
+        {
+            $requiredSeverities = ["critical", "high", "medium", "low", "informational"];
+            $actionMap = [
+                "critical"      => "alert",
+                "high"          => "alert",
+                "medium"        => "alert",
+                "low"           => "default",
+                "informational" => "default"
+            ];
+
+            foreach ($requiredSeverities as $severity)
+            {
+                $coverage = $object->rule_coverage[$severity] ?? [];
+
+                // If host 'any' exists and is completely generic, this severity is safely covered
+                $hasValidAnyHost = isset($coverage['any'])
+                    && ($coverage['any']['threat-name'] ?? '') === 'any'
+                    && ($coverage['any']['category'] ?? '') === 'any';
+
+                if ($hasValidAnyHost)
+                {
+                    continue;
+                }
+
+                // If host isn't 'any', then both 'client' and 'server' must be available and fully generic
+                foreach (['client', 'server'] as $host_type)
+                {
+                    $hasValidHost = isset($coverage[$host_type])
+                        && ($coverage[$host_type]['threat-name'] ?? '') === 'any'
+                        && ($coverage[$host_type]['category'] ?? '') === 'any';
+
+                    if (!$hasValidHost)
+                    {
+                        $ruleName = $severity . "_" . $host_type;
+                        $action = $actionMap[$severity] ?? 'default';
+
+                        $threadPolicy_obj = new ThreatPolicyVulnerability($ruleName, $object);
+                        $threadPolicy_obj->type = "ThreatPolicyVulnerability";
+                        $threadPolicy_obj->action = $action;
+                        $threadPolicy_obj->host = $host_type;
+
+                        $object->rules_obj[] = $threadPolicy_obj;
+                        $threadPolicy_obj->addReference($object);
+                        $object->owner->owner->ThreatPolicyStore->add($threadPolicy_obj);
+
+                        $threadPolicy_obj->newThreatPolicyXML(
+                            $object->xmlroot,
+                            $ruleName,
+                            $severity,
+                            $action,
+                            $host_type
+                        );
+
+                        $sendAPI = true;
+                    }
+                    else
+                    {
+                        #print "severity already set: " . $severity . " (" . $host_type . ")\n";
+                    }
+                }
+            }
+
+            // Refresh coverage mapping one final time to reflect the newly generated rules
+            $object->vulnerability_rules_coverage();
+        }
+        else
+        {
+            #print "exit as any is available as severity\n";
+        }
+    }
+);
+
 SecurityProfileCallContext::$supportedActions['vulnerability.alert-only-set'] = array(
     'name' => 'vulnerability.alert-only-set',
     'MainFunction' => function (SecurityProfileCallContext $context) {
