@@ -3461,8 +3461,8 @@ SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-se
     }
 );
 
-SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set'] = array(
-    'name' => 'vulnerability.rules.alert-only-set',
+SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set_NEW1'] = array(
+    'name' => 'vulnerability.rules.alert-only-set_NEW1',
     'MainFunction' => function (SecurityProfileCallContext $context)
     {
         $object = $context->object;
@@ -3578,19 +3578,145 @@ SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-se
 
                         $sendAPI = true;
                     }
-                    else
-                    {
-                        #print "severity already set: " . $severity . " (" . $host_type . ")\n";
-                    }
                 }
             }
 
             // Refresh coverage mapping one final time to reflect the newly generated rules
             $object->vulnerability_rules_coverage();
         }
-        else
+    }
+);
+
+SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set'] = array(
+    'name' => 'vulnerability.rules.alert-only-set',
+    'MainFunction' => function (SecurityProfileCallContext $context)
+    {
+        /** @var VulnerabilityProfile $object */
+        $object = $context->object;
+
+        if (get_class($object) !== "VulnerabilityProfile")
+            return null;
+
+        // 1. Normalize existing rules to "alert" if they are set to "allow"
+        $sp_severity = array();
+        foreach ($object->rules_obj as $rule)
         {
-            #print "exit as any is available as severity\n";
+            /** @var ThreatPolicy $rule */
+            $sp_severity = array_merge($sp_severity, $rule->severity());
+
+            if ($rule->action() === "allow")
+            {
+                $rule->action = "alert";
+
+                $tmp = DH::findFirstElement("action", $rule->xmlroot);
+                if ($tmp !== false)
+                {
+                    $tmp_action = DH::firstChildElement($tmp);
+                    if ($tmp_action !== false)
+                    {
+                        $tmp->removeChild($tmp_action);
+                        $xmlElement = DH::importXmlStringOrDie($rule->xmlroot->ownerDocument, '<alert/>');
+                        $tmp->appendChild($xmlElement);
+                        $sendAPI = true;
+                    }
+                }
+            }
+        }
+
+        // Calculate initial rule coverage once
+        $object->vulnerability_rules_coverage();
+
+        // --- EXTENSION: Define fields that must equal 'any' to be a valid catch-all ---
+        $matchFields = ['threat-name', 'category', 'vendor-id', 'cve'];
+
+        // Helper function to verify if a profile section is a complete 'any' catch-all
+        $isGenericCatchAll = function ($config) use ($matchFields)
+        {
+            if (!is_array($config)) {
+                return false;
+            }
+            foreach ($matchFields as $field) {
+                if (($config[$field] ?? '') !== 'any') {
+                    return false;
+                }
+            }
+            return true;
+        };
+        // ------------------------------------------------------------------------------
+
+        // 2. Check if a clean global 'any' severity catch-all rule exists
+        $hasValidAnySeverity = false;
+        if (in_array("any", $sp_severity))
+        {
+            $anyCoverage = $object->rule_coverage['any'] ?? [];
+            $hasInvalidAnyThreat = false;
+
+            foreach (['any', 'client', 'server'] as $hostType)
+            {
+                // If a host rule profile exists but fails the global 'any' catch-all validation
+                if (isset($anyCoverage[$hostType]) && !$isGenericCatchAll($anyCoverage[$hostType]))
+                {
+                    $hasInvalidAnyThreat = true;
+                    break;
+                }
+            }
+            if (!$hasInvalidAnyThreat)
+                $hasValidAnySeverity = true;
+        }
+
+        // 3. Process missing coverages if 'any' isn't explicitly handling it cleanly
+        if (!$hasValidAnySeverity)
+        {
+            $requiredSeverities = ["critical", "high", "medium", "low", "informational"];
+            $actionMap = [
+                "critical"      => "alert",
+                "high"          => "alert",
+                "medium"        => "alert",
+                "low"           => "default",
+                "informational" => "default"
+            ];
+
+            foreach ($requiredSeverities as $severity)
+            {
+                $coverage = $object->rule_coverage[$severity] ?? [];
+
+                // If host 'any' exists and covers all fields cleanly, this severity is safely covered
+                if ($isGenericCatchAll($coverage['any'] ?? null))
+                    continue;
+
+                // If host isn't a global 'any', check specific client/server profiles
+                foreach (['client', 'server'] as $host_type)
+                {
+                    // Trigger new rule creation if the specific host fails the catch-all checklist
+                    if (!$isGenericCatchAll($coverage[$host_type] ?? null))
+                    {
+                        $ruleName = $severity . "_" . $host_type;
+                        $action = $actionMap[$severity] ?? 'default';
+
+                        $threadPolicy_obj = new ThreatPolicyVulnerability($ruleName, $object);
+                        $threadPolicy_obj->type = "ThreatPolicyVulnerability";
+                        $threadPolicy_obj->action = $action;
+                        $threadPolicy_obj->host = $host_type;
+
+                        $object->rules_obj[] = $threadPolicy_obj;
+                        $threadPolicy_obj->addReference($object);
+                        $object->owner->owner->ThreatPolicyStore->add($threadPolicy_obj);
+
+                        $threadPolicy_obj->newThreatPolicyXML(
+                            $object->xmlroot,
+                            $ruleName,
+                            $severity,
+                            $action,
+                            $host_type
+                        );
+
+                        $sendAPI = true;
+                    }
+                }
+            }
+
+            // Refresh coverage mapping one final time to reflect changes
+            $object->vulnerability_rules_coverage();
         }
     }
 );
