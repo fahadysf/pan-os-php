@@ -5023,7 +5023,7 @@ RuleCallContext::$supportedActions[] = array(
 
         if( is_object( $rule ) )
         {
-            if( $rule->isSecurityRule() )
+            if( $rule->isSecurityRule() || $rule->isDefaultSecurityRule())
                 $context->arguments['tmp_secrule'] = true;
             elseif( $rule->isNatRule() )
                 $context->arguments['tmp_natrule'] = true;
