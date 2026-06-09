@@ -1831,13 +1831,9 @@ RQuery::$defaultFilters['securityprofile']['device']['operators']['is.buckbeak']
     'Function' => function (SecurityProfileRQueryContext $context) {
         $object = $context->object;
 
-        if ( $object->owner->owner->isBuckbeak()
-            || $object->owner->owner->isFawkes()
-            || $object->owner->owner->isContainer()
-            || $object->owner->owner->isDeviceOnPrem()
-            || $object->owner->owner->isDeviceCloud()
-            || $object->owner->owner->isSnippet()
-        )
+        $rootObject = PH::findRootObjectOrDie($context->object->owner->owner);
+
+        if ( $rootObject->isBuckbeak() )
             return TRUE;
 
         return FALSE;

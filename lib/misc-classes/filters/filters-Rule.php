@@ -2833,6 +2833,33 @@ RQuery::$defaultFilters['rule']['secprof']['operators']['wf-profile.is.set'] = a
         'input' => 'input/panorama-8.0.xml'
     )
 );
+RQuery::$defaultFilters['rule']['secprof']['operators']['avwf-profile.is.set'] = array(
+    'Function' => function (RuleRQueryContext $context) {
+        $rule = $context->object;
+        if( !$rule->isSecurityRule() && !$rule->isDefaultSecurityRule() )
+            return FALSE;
+
+        if( $rule->securityProfileIsBlank() )
+            return FALSE;
+
+        if( $rule->securityProfileType() == "group" )
+        {
+            /** @var SecurityProfileGroup $tmp_group */
+            $tmp_group =  $rule->owner->owner->securityProfileGroupStore->find( $rule->securityProfileGroup() );
+            if( $tmp_group !== null )
+                $secprof_objects = $tmp_group->securityProfiles();
+        }
+        else
+            $secprof_objects = $rule->securityProfiles();
+
+        return isset($secprof_objects['virus-and-wildfire-analysis']);
+    },
+    'arg' => FALSE,
+    'ci' => array(
+        'fString' => '(%PROP%)',
+        'input' => 'input/panorama-8.0.xml'
+    )
+);
 RQuery::$defaultFilters['rule']['secprof']['operators']['vuln-profile.is.set'] = array(
     'Function' => function (RuleRQueryContext $context) {
         $rule = $context->object;
@@ -2907,6 +2934,33 @@ RQuery::$defaultFilters['rule']['secprof']['operators']['data-profile.is.set'] =
             $secprof_objects = $rule->securityProfiles();
 
         return isset($secprof_objects['data-filtering']);
+    },
+    'arg' => FALSE,
+    'ci' => array(
+        'fString' => '(%PROP%)',
+        'input' => 'input/panorama-8.0.xml'
+    )
+);
+RQuery::$defaultFilters['rule']['secprof']['operators']['dnssec-profile.is.set'] = array(
+    'Function' => function (RuleRQueryContext $context) {
+        $rule = $context->object;
+        if( !$rule->isSecurityRule() && !$rule->isDefaultSecurityRule() )
+            return FALSE;
+
+        if( $rule->securityProfileIsBlank() )
+            return FALSE;
+
+        if( $rule->securityProfileType() == "group" )
+        {
+            /** @var SecurityProfileGroup $tmp_group */
+            $tmp_group =  $rule->owner->owner->securityProfileGroupStore->find( $rule->securityProfileGroup() );
+            if( $tmp_group !== null )
+                $secprof_objects = $tmp_group->securityProfiles();
+        }
+        else
+            $secprof_objects = $rule->securityProfiles();
+
+        return isset($secprof_objects['dns-security']);
     },
     'arg' => FALSE,
     'ci' => array(
@@ -4705,13 +4759,9 @@ RQuery::$defaultFilters['rule']['device']['operators']['is.buckbeak'] = array(
     'Function' => function (RuleRQueryContext $context) {
         $object = $context->object;
 
-        if ( $object->owner->owner->isBuckbeak()
-            || $object->owner->owner->isFawkes()
-            || $object->owner->owner->isContainer()
-            || $object->owner->owner->isDeviceOnPrem()
-            || $object->owner->owner->isDeviceCloud()
-            || $object->owner->owner->isSnippet()
-        )
+        $rootObject = PH::findRootObjectOrDie($context->object->owner->owner);
+
+        if ( $rootObject->isBuckbeak() )
             return TRUE;
 
         return FALSE;
