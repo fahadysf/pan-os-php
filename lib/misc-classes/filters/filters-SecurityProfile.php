@@ -1826,4 +1826,22 @@ RQuery::$defaultFilters['securityprofile']['object']['operators']['is.predefined
     },
     'arg' => FALSE
 );
+
+RQuery::$defaultFilters['securityprofile']['device']['operators']['is.buckbeak'] = array(
+    'Function' => function (SecurityProfileRQueryContext $context) {
+        $object = $context->object;
+
+        if ( $object->owner->owner->isBuckbeak()
+            || $object->owner->owner->isFawkes()
+            || $object->owner->owner->isContainer()
+            || $object->owner->owner->isDeviceOnPrem()
+            || $object->owner->owner->isDeviceCloud()
+            || $object->owner->owner->isSnippet()
+        )
+            return TRUE;
+
+        return FALSE;
+    },
+    'arg' => FALSE
+);
 // </editor-fold>

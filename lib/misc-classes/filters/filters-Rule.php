@@ -4700,5 +4700,23 @@ RQuery::$defaultFilters['rule']['decryption-certificate']['operators']['has.rege
     },
     'arg' => TRUE
 );
+
+RQuery::$defaultFilters['rule']['device']['operators']['is.buckbeak'] = array(
+    'Function' => function (RuleRQueryContext $context) {
+        $object = $context->object;
+
+        if ( $object->owner->owner->isBuckbeak()
+            || $object->owner->owner->isFawkes()
+            || $object->owner->owner->isContainer()
+            || $object->owner->owner->isDeviceOnPrem()
+            || $object->owner->owner->isDeviceCloud()
+            || $object->owner->owner->isSnippet()
+        )
+            return TRUE;
+
+        return FALSE;
+    },
+    'arg' => FALSE
+);
 // </editor-fold>
 

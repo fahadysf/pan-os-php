@@ -667,4 +667,21 @@ RQuery::$defaultFilters['securityprofilegroup']['object']['operators']['has.pred
         'input' => 'input/panorama-8.0.xml'
     )
 );
+RQuery::$defaultFilters['securityprofilegroup']['device']['operators']['is.buckbeak'] = array(
+    'Function' => function (SecurityprofilegroupRQueryContext $context) {
+        $object = $context->object;
+
+        if ( $object->owner->owner->isBuckbeak()
+            || $object->owner->owner->isFawkes()
+            || $object->owner->owner->isContainer()
+            || $object->owner->owner->isDeviceOnPrem()
+            || $object->owner->owner->isDeviceCloud()
+            || $object->owner->owner->isSnippet()
+        )
+            return TRUE;
+
+        return FALSE;
+    },
+    'arg' => FALSE
+);
 // </editor-fold>
