@@ -792,6 +792,34 @@ class SecurityRule extends RuleWithUserID
         return TRUE;
     }
 
+    public function setSecProf_AVWF($newAVprof)
+    {
+        $this->secproftype = 'profile';
+        $this->secprofgroup = null;
+        if( $newAVprof == null )
+            unset($this->secprofProfiles_obj['virus-and-wildfire-analysis']);
+        else
+            $this->secprofProfiles_obj['virus-and-wildfire-analysis'] = $newAVprof;
+
+        $this->rewriteSecProfXML();
+
+        return TRUE;
+    }
+
+    public function setSecProf_DNSSEC($newAVprof)
+    {
+        $this->secproftype = 'profile';
+        $this->secprofgroup = null;
+        if( $newAVprof == null )
+            unset($this->secprofProfiles_obj['dns-security']);
+        else
+            $this->secprofProfiles_obj['dns-security'] = $newAVprof;
+
+        $this->rewriteSecProfXML();
+
+        return TRUE;
+    }
+
     public function rewriteSecProfXML()
     {
 

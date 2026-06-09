@@ -7,6 +7,7 @@ UTIL:
 * type=zone-protection-profile actions=display/exporttoexcel | extend with additional fields
 * type=device actions=sp_spg-create-alert-only-BP | extend for SCM
 * type=rule/securityprofile/securityprofilegroup | introduce 'filter=(device is.buckbeack)' | better validation for a combined playbook for Panorama / SCM
+* type=rule | extend 'actions=securityProfile-Profile-Set:virus-and-wildfire/dns-security | to cover SCM
 
 BUGFIX:
 * type=securityprofile actions=vulnerability.rules.alert-only-set | to cover corner case
