@@ -2333,10 +2333,13 @@ SecurityProfileCallContext::$supportedActions['virus.decoder.alert-only-set'] = 
     'MainFunction' => function (SecurityProfileCallContext $context) {
         $object = $context->object;
 
-        if (get_class($object) !== "AntiVirusProfile")
+        if (get_class($object) !== "AntiVirusProfile" && get_class( $object) !== "VirusAndWildfireProfile" )
             return null;
 
         $tmp_decoder = DH::findFirstElement('decoder', $object->xmlroot);
+        if( $tmp_decoder === False)
+            return null;
+
         foreach($object->tmp_virus_prof_array as $decoder )
         {
             $xmlNode = DH::findFirstElementByNameAttr("entry", $decoder, $tmp_decoder);
@@ -2361,7 +2364,7 @@ SecurityProfileCallContext::$supportedActions['virus.inline-ml.alert-only-set'] 
     {
         $object = $context->object;
 
-        if (get_class($object) !== "AntiVirusProfile")
+        if (get_class($object) !== "AntiVirusProfile" && get_class( $object) !== "VirusAndWildfireProfile" )
             return null;
 
         $tmp_mlav_engine = DH::findFirstElement('mlav-engine-filebased-enabled', $object->xmlroot);
@@ -2529,7 +2532,11 @@ SecurityProfileCallContext::$supportedActions['spyware.dns.best-practice-set'] =
     {
         $object = $context->object;
 
-        if (get_class($object) !== "AntiSpywareProfile")
+        if (get_class($object) !== "AntiSpywareProfile" && get_class($object) !== "DNSSecurityProfile")
+            return null;
+
+        $rootObject = PH::findRootObjectOrDie($context->object->owner->owner);
+        if ( get_class($object) == "AntiSpywareProfile" && $rootObject->isBuckbeak() )
             return null;
 
         $hasDNSlicense = $context->arguments['has-DNS-license'];
@@ -2623,7 +2630,11 @@ SecurityProfileCallContext::$supportedActions['spyware.botnet.best-practice-set'
     'MainFunction' => function (SecurityProfileCallContext $context) {
         $object = $context->object;
 
-        if (get_class($object) !== "AntiSpywareProfile")
+        if (get_class($object) !== "AntiSpywareProfile" && get_class($object) !== "DNSSecurityProfile")
+            return null;
+
+        $rootObject = PH::findRootObjectOrDie($context->object->owner->owner);
+        if ( get_class($object) == "AntiSpywareProfile" && $rootObject->isBuckbeak() )
             return null;
 
         $hasDNSlicense = $context->arguments['has-DNS-license'];
@@ -2723,6 +2734,36 @@ SecurityProfileCallContext::$supportedActions['spyware.best-practice-set'] = arr
     'args' => array('has-DNS-license' =>
         array('type' => 'bool', 'default' => 'true',
             'help' => "[has-DNS-license] 'spyware.best-practice-set:FALSE' - define correct AS Profile setting if License is NOT available"
+        )
+    )
+);
+SecurityProfileCallContext::$supportedActions['dns-security.best-practice-set'] = array(
+    'name' => 'dns-security.best-practice-set',
+    'MainFunction' => function (SecurityProfileCallContext $context) {
+        $object = $context->object;
+
+        if (get_class($object) !== "DNSSecurityProfile")
+            return null;
+
+
+        ////////////////////////////////////////
+        //dns
+        $f = SecurityProfileCallContext::$supportedActions['spyware.dns.best-practice-set']['MainFunction'];
+        $f($context);
+
+        ////////////////////////////////////////
+        //botnet
+        $f = SecurityProfileCallContext::$supportedActions['spyware.botnet.best-practice-set']['MainFunction'];
+        $f($context);
+
+        if( $context->isAPI )
+        {
+            $object->API_sync();
+        }
+    },
+    'args' => array('has-DNS-license' =>
+        array('type' => 'bool', 'default' => 'true',
+            'help' => "[has-DNS-license] 'dns-security.best-practice-set:FALSE' - define correct AS Profile setting if License is NOT available"
         )
     )
 );
@@ -2903,11 +2944,15 @@ SecurityProfileCallContext::$supportedActions['spyware.dns.alert-only-set'] = ar
         /** @var AntiSpywareProfile $object */
         $object = $context->object;
 
-        if (get_class($object) !== "AntiSpywareProfile")
+        if (get_class($object) !== "AntiSpywareProfile" && get_class($object) !== "DNSSecurityProfile")
         {
             PH::print_stdout("skipped");
             return null;
         }
+
+        $rootObject = PH::findRootObjectOrDie($context->object->owner->owner);
+        if ( get_class($object) == "AntiSpywareProfile" && $rootObject->isBuckbeak() )
+            return null;
 
         $hasDNSlicense = $context->arguments['has-DNS-license'];
         foreach( $object->dns_rules_obj as $rule )
@@ -3006,11 +3051,15 @@ SecurityProfileCallContext::$supportedActions['spyware.botnet.alert-only-set'] =
         /** @var AntiSpywareProfile $object */
         $object = $context->object;
 
-        if (get_class($object) !== "AntiSpywareProfile")
+        if (get_class($object) !== "AntiSpywareProfile" && get_class($object) !== "DNSSecurityProfile")
         {
             PH::print_stdout("skipped");
             return null;
         }
+
+        $rootObject = PH::findRootObjectOrDie($context->object->owner->owner);
+        if ( get_class($object) == "AntiSpywareProfile" && $rootObject->isBuckbeak() )
+            return null;
 
         $hasDNSlicense = $context->arguments['has-DNS-license'];
         $tmp_rule = DH::findFirstElement('botnet-domains', $object->xmlroot);
@@ -3117,7 +3166,41 @@ SecurityProfileCallContext::$supportedActions['spyware.alert-only-set'] = array(
         )
     )
 );
+SecurityProfileCallContext::$supportedActions['dns-security.alert-only-set'] = array(
+    'name' => 'dns-security.alert-only-set',
+    'MainFunction' => function (SecurityProfileCallContext $context) {
+        /** @var DNSSecurityProfile $object */
+        $object = $context->object;
 
+        if (get_class($object) !== "DNSSecurityProfile")
+        {
+            PH::print_stdout("skipped");
+            return null;
+        }
+
+
+
+        /////////////////////////////////////////////////////////
+        $f = SecurityProfileCallContext::$supportedActions['spyware.dns.alert-only-set']['MainFunction'];
+        $f($context);
+
+
+        /////////////////////////////////////////////////////////
+        $f = SecurityProfileCallContext::$supportedActions['spyware.botnet.alert-only-set']['MainFunction'];
+        $f($context );
+
+
+        if( $context->isAPI )
+        {
+            $object->API_sync();
+        }
+    },
+    'args' => array('has-DNS-license' =>
+        array('type' => 'bool', 'default' => 'true',
+            'help' => "[has-DNS-license] 'dns-security.alert-only-set:FALSE' - define correct DNSSecurity Profile setting if License is NOT available"
+        )
+    )
+);
 SecurityProfileCallContext::$supportedActions['vulnerability.inline-ml.best-practice-set'] = array(
     'name' => 'vulnerability.inline-ml.best-practice-set',
     'MainFunction' => function (SecurityProfileCallContext $context) {
@@ -3798,7 +3881,7 @@ SecurityProfileCallContext::$supportedActions['wildfire.inline-ml.alert-only-set
     {
         $object = $context->object;
 
-        if (get_class($object) !== "WildfireProfile")
+        if (get_class($object) !== "WildfireProfile" && get_class( $object) !== "VirusAndWildfireProfile" )
             return null;
 
         $sendAPI = false;
@@ -3901,7 +3984,7 @@ SecurityProfileCallContext::$supportedActions['wildfire.rules.alert-only-set'] =
         /** @var WildfireProfile $object */
         $object = $context->object;
 
-        if (get_class($object) !== "WildfireProfile")
+        if (get_class($object) !== "WildfireProfile" && get_class( $object) !== "VirusAndWildfireProfile" )
         {
             PH::print_stdout("skipped");
             return null;
@@ -3982,7 +4065,7 @@ SecurityProfileCallContext::$supportedActions['wildfire.inline-ml.best-practice-
     'MainFunction' => function (SecurityProfileCallContext $context) {
         $object = $context->object;
 
-        if (get_class($object) !== "WildfireProfile")
+        if (get_class($object) !== "WildfireProfile" && get_class( $object) !== "VirusAndWildfireProfile" )
             return null;
 
         $tmp_mlav_engine = DH::findFirstElement('cloud-inline-analysis', $object->xmlroot);
@@ -4054,6 +4137,68 @@ SecurityProfileCallContext::$supportedActions['wildfire.best-practice-set'] = ar
     },
 );
 
+SecurityProfileCallContext::$supportedActions['virus-and-wildfire.alert-only-set'] = array(
+    'name' => 'virus-and-wildfire.alert-only-set',
+    'MainFunction' => function (SecurityProfileCallContext $context) {
+        $object = $context->object;
+
+        if( get_class( $object) !== "VirusAndWildfireProfile")
+            return null;
+
+        ///////////////////////////////////////////////////////////////
+        $f = SecurityProfileCallContext::$supportedActions['virus.decoder.alert-only-set']['MainFunction'];
+        $f($context);
+
+
+        ///////////////////////////////////////////////////////////////
+        $f = SecurityProfileCallContext::$supportedActions['virus.inline-ml.alert-only-set']['MainFunction'];
+        $f($context);
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+        /// InlineML
+        $f = SecurityProfileCallContext::$supportedActions['wildfire.inline-ml.alert-only-set']['MainFunction'];
+        $f($context );
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+        /// Rules
+        $f = SecurityProfileCallContext::$supportedActions['wildfire.rules.alert-only-set']['MainFunction'];
+        $f($context );
+
+        #if( $context->isAPI )
+        #    $object->API_sync();
+
+    },
+);
+SecurityProfileCallContext::$supportedActions['virus-and-wildfire.best-practice-set'] = array(
+    'name' => 'wildfire.best-practice-set',
+    'MainFunction' => function (SecurityProfileCallContext $context) {
+        $object = $context->object;
+
+        if (get_class($object) !== "VirusAndWildfireProfile")
+            return null;
+
+        //AV
+        ////////////////////////////////////////////
+        $f = SecurityProfileCallContext::$supportedActions['virus.decoder.best-practice-set']['MainFunction'];
+        $f($context);
+
+        ////////////////////////////////////////////
+        $f = SecurityProfileCallContext::$supportedActions['virus.inline-ml.best-practice-set']['MainFunction'];
+        $f($context);
+
+        //WF
+        //////////////////////////////////////////////////////////////////////
+        /// inline
+        $f = SecurityProfileCallContext::$supportedActions['wildfire.inline-ml.best-practice-set']['MainFunction'];
+        $f($context );
+
+        if( $context->isAPI )
+        {
+            $object->API_sync();
+        }
+    },
+);
 SecurityProfileCallContext::$supportedActions['url.alert-only-set'] = array(
     'name' => 'url.alert-only-set',
     'MainFunction' => function (SecurityProfileCallContext $context) {

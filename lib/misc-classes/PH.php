@@ -925,7 +925,7 @@ class PH
 
     /**
      * @param $panConfObject
-     * @return PANConf|PanoramaConf
+     * @return PANConf|PanoramaConf|BuckbeakConf|FawkesConf
      * @throws Exception
      */
     public static function findRootObjectOrDie($panConfObject)
