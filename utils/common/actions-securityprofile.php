@@ -3323,8 +3323,8 @@ SecurityProfileCallContext::$supportedActions['vulnerability.inline-ml.alert-onl
     }
 );
 
-SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set_OLD'] = array(
-    'name' => 'vulnerability.rules.alert-only-set_OLD',
+SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set'] = array(
+    'name' => 'vulnerability.rules.alert-only-set',
     'MainFunction' => function (SecurityProfileCallContext $context )
     {
         $object = $context->object;
@@ -3587,8 +3587,8 @@ SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-se
     }
 );
 
-SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set'] = array(
-    'name' => 'vulnerability.rules.alert-only-set',
+SecurityProfileCallContext::$supportedActions['vulnerability.rules.alert-only-set_NEW2'] = array(
+    'name' => 'vulnerability.rules.alert-only-set_NEW2',
     'MainFunction' => function (SecurityProfileCallContext $context)
     {
         /** @var VulnerabilityProfile $object */
