@@ -393,7 +393,7 @@ class DNSPolicy
         return TRUE;
     }
 
-    public function spyware_advanceddns_security_rule_bestpractice()
+    public function spyware_advanced_dns_security_rule_bestpractice()
     {
         $tmp_debug = false;
 
@@ -509,7 +509,7 @@ class DNSPolicy
         return TRUE;
     }
 
-    public function spyware_advanceddns_security_rule_visibility()
+    public function spyware_advanced_dns_security_rule_visibility()
     {
         $tmp_debug = false;
 

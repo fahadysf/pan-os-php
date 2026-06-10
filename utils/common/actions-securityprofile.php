@@ -1303,10 +1303,10 @@ SecurityProfileCallContext::$supportedActions[] = array(
                                     //$string .= " - packet-capture: '".$rule->packetCapture()."'";
                                     /** @var DNSPolicy $rule */
                                     //Todo: TBD
-                                    #if( $bestPractice && !$rule->spyware_dns_security_rule_bestpractice() )
-                                    #    $string .= $bp_NOT_sign;
-                                    #if( $visibility && !$rule->spyware_dns_security_rule_visibility() )
-                                    #    $string .= $visible_NOT_sign;
+                                    if( $bestPractice && !$rule->spyware_advanced_dns_security_rule_bestpractice() )
+                                        $string .= $bp_NOT_sign;
+                                    if( $visibility && !$rule->spyware_advanced_dns_security_rule_visibility() )
+                                        $string .= $visible_NOT_sign;
                                     $string_dns_security[] = $string;
                                 }
                             }
@@ -1612,14 +1612,14 @@ SecurityProfileCallContext::$supportedActions[] = array(
                     {
                         if( $bestPractice )
                         {
-                            if( $object->spyware_dns_security_best_practice() )
+                            if( $object->spyware_dns_security_best_practice() && $object->spyware_advanced_dns_security_best_practice())
                                 $lines .= $context->encloseFunction($bp_text_yes.' BP AS dns_security set');
                             else
                                 $lines .= $context->encloseFunction($bp_text_no.' NO BP AS dns_security');
                         }
                         if( $visibility )
                         {
-                            if( $object->spyware_dns_security_visibility() )
+                            if( $object->spyware_dns_security_visibility() && $object->spyware_advanced_dns_security_visibility() )
                                 $lines .= $context->encloseFunction($bp_text_yes.' Visibility AS dns_security set');
                             else
                                 $lines .= $context->encloseFunction($bp_text_no.' NO Visibility AS dns_security');
