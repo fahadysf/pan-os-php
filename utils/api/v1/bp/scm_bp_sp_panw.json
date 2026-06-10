@@ -209,6 +209,19 @@
                         ]
                     }
                 ]
+            },
+            "visibility": {
+                "action": [
+                    {
+                        "type": [
+                            "pan-adns-sec-dnsmisconfig",
+                            "pan-adns-sec-hijacking"
+                        ],
+                        "log-level": [
+                            "!none"
+                        ]
+                    }
+                ]
             }
         },
         "lists": {
