@@ -172,7 +172,7 @@ class DNSPolicy
 
         if( $tmp_debug )
             print_r( $check_array );
-        if( isset( $check_array['array'] ) )
+        if( isset( $check_array['action'] ) )
         {
             foreach( $check_array['action'] as $validate )
             {
@@ -660,6 +660,9 @@ class DNSPolicy
     public function spyware_lists_bestpractice()
     {
         $check_array = $this->spyware_lists_bp_visibility_JSON( "bp");
+
+        if( !isset( $check_array['action'] ) )
+            return TRUE;
 
         foreach( $check_array['action'] as $validate )
         {
