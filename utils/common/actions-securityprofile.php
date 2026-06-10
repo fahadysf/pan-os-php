@@ -1605,8 +1605,9 @@ SecurityProfileCallContext::$supportedActions[] = array(
                                 || get_class($object->owner->owner ) == "PANConf"
                                 || get_class($object->owner->owner ) == "VirtualSystem")
                         )
+                        //Todo: something wrong with the SCM version validation
                             || get_class($object) == "DNSSecurityProfile")
-                        && $object->owner->owner->version >= 102
+                       // && $object->owner->owner->version >= 102
                     )
                     {
                         if( $bestPractice )
