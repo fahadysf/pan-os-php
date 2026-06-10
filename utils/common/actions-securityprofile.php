@@ -2983,8 +2983,8 @@ SecurityProfileCallContext::$supportedActions['spyware.dns.alert-only-set'] = ar
                         $tmp_action->textContent = "allow";
                     if( $tmp_packet_capture->textContent == "" )
                         $tmp_packet_capture->textContent = "disable";
-                    if( $tmp_log_level->textContent == "" )
-                        $tmp_log_level->textContent = "none";
+                    if( $tmp_log_level->textContent == "" || $tmp_log_level->textContent == "none" )
+                        $tmp_log_level->textContent = "default";
 
                 }
                 else
@@ -3008,8 +3008,26 @@ SecurityProfileCallContext::$supportedActions['spyware.dns.alert-only-set'] = ar
                             $tmp_action->textContent = "allow";
                         if( $tmp_packet_capture->textContent == "" )
                             $tmp_packet_capture->textContent = "disable";
-                        if( $tmp_log_level->textContent == "" )
-                            $tmp_log_level->textContent = "none";
+                        if( $tmp_log_level->textContent == "" || $tmp_log_level->textContent == "none" )
+                            $tmp_log_level->textContent = "default";
+                    }
+                    else
+                    {
+                        $tmp_action->textContent = "allow";
+                        $tmp_packet_capture->textContent = "disable";
+                        $tmp_log_level->textContent = "none";
+                    }
+                }
+                else
+                {
+                    if( $hasDNSlicense )
+                    {
+                        if( $tmp_action->textContent == "" )
+                            $tmp_action->textContent = "allow";
+                        if( $tmp_packet_capture->textContent == "" )
+                            $tmp_packet_capture->textContent = "disable";
+                        if( $tmp_log_level->textContent == "" || $tmp_log_level->textContent == "none" )
+                            $tmp_log_level->textContent = "default";
                     }
                     else
                     {
@@ -3027,8 +3045,8 @@ SecurityProfileCallContext::$supportedActions['spyware.dns.alert-only-set'] = ar
                         $tmp_action->textContent = "sinkhole";
                     if( $tmp_packet_capture->textContent == "" )
                         $tmp_packet_capture->textContent = "disable";
-                    if( $tmp_log_level->textContent == "" )
-                        $tmp_log_level->textContent = "none";
+                    if( $tmp_log_level->textContent == "" || $tmp_log_level->textContent == "none" )
+                        $tmp_log_level->textContent = "default";
                 }
                 else
                 {
@@ -3045,6 +3063,7 @@ SecurityProfileCallContext::$supportedActions['spyware.dns.alert-only-set'] = ar
         )
     )
 );
+
 SecurityProfileCallContext::$supportedActions['spyware.botnet.alert-only-set'] = array(
     'name' => 'spyware.botnet.alert-only-set',
     'MainFunction' => function (SecurityProfileCallContext $context )

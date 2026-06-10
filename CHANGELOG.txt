@@ -16,6 +16,7 @@ BUGFIX:
 * type=rule ruletype=defaultsecurity actions=exporttoexcel | bugfix to add SP info corner case
 * type=securityprofile securityprofiletype=spyware 'filter=(dns-security is.visibility)' | bugfix introduce logic
 * type=securityprofile | extend spyware validation for advanced-dns-security
+* type=securityprofile securityprofiletype=spyware actions=spyware.dns.alert-only-set | bugfix to set log-level for visibility
 
 GENERAL:
 
