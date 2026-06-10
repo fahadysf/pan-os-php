@@ -661,58 +661,58 @@ class DNSPolicy
     {
         $check_array = $this->spyware_lists_bp_visibility_JSON( "bp");
 
-        if( !isset( $check_array['action'] ) )
-            return TRUE;
-
-        foreach( $check_array['action'] as $validate )
+        if( isset( $check_array['action'] ) )
         {
-            $bp_action = FALSE;
-            $bp_packet = FALSE;
-
-            foreach( $validate['type'] as $name )
+            foreach( $check_array['action'] as $validate )
             {
-                if( $this->name() == $name )
+                $bp_action = FALSE;
+                $bp_packet = FALSE;
+
+                foreach( $validate['type'] as $name )
                 {
-                    #print "0) name: ".$name."\n";
-                    foreach( $validate['action'] as $final_action_check )
+                    if( $this->name() == $name )
                     {
-                        #print "1) action: ".$this->action()." |validate: ".$final_action_check."\n";
-                        if( $this->action() == $final_action_check )
+                        #print "0) name: ".$name."\n";
+                        foreach( $validate['action'] as $final_action_check )
                         {
-                            $bp_action = TRUE;
-                            #print "1-0) true\n";
-                            break;
+                            #print "1) action: ".$this->action()." |validate: ".$final_action_check."\n";
+                            if( $this->action() == $final_action_check )
+                            {
+                                $bp_action = TRUE;
+                                #print "1-0) true\n";
+                                break;
+                            }
+                            else
+                            {
+                                $bp_action = FALSE;
+                                #print "1-1) false\n";
+                            }
+
                         }
+
+
+                        foreach( $validate['packet-capture'] as $final_packet_check )
+                        {
+                            #print "2) packet: ".$this->packetCapture()." |validate: ".$final_packet_check."\n";
+                            if( $this->packetCapture() == $final_packet_check )
+                            {
+                                $bp_packet = TRUE;
+                                #print "2-0) true\n";
+                                break;
+                            }
+                            else
+                            {
+                                $bp_packet = FALSE;
+                                #print "2-1) false\n";
+                            }
+                        }
+
+
+                        if( $bp_action && $bp_packet )
+                            return TRUE;
                         else
-                        {
-                            $bp_action = FALSE;
-                            #print "1-1) false\n";
-                        }
-
+                            return FALSE;
                     }
-
-
-                    foreach( $validate['packet-capture'] as $final_packet_check )
-                    {
-                        #print "2) packet: ".$this->packetCapture()." |validate: ".$final_packet_check."\n";
-                        if( $this->packetCapture() == $final_packet_check )
-                        {
-                            $bp_packet = TRUE;
-                            #print "2-0) true\n";
-                            break;
-                        }
-                        else
-                        {
-                            $bp_packet = FALSE;
-                            #print "2-1) false\n";
-                        }
-                    }
-
-
-                    if( $bp_action && $bp_packet )
-                        return TRUE;
-                    else
-                        return FALSE;
                 }
             }
         }
